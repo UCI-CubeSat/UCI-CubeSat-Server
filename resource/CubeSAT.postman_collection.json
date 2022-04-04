@@ -1,0 +1,98 @@
+{
+	"info": {
+		"_postman_id": "cd8ed9df-0a51-4f22-a1f8-846b18277854",
+		"name": "CubeSAT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Available Satellite",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host_base}}/available_satellite",
+					"host": [
+						"{{host_base}}"
+					],
+					"path": [
+						"available_satellite"
+					]
+				},
+				"description": "py-satellite-dashboard geocoding api"
+			},
+			"response": []
+		},
+		{
+			"name": "Get TLE from cache/db/satnog",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host_base}}/tle",
+					"host": [
+						"{{host_base}}"
+					],
+					"path": [
+						"tle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get prediction for ISS at UCI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rxLatLng\": {\n        \"lat\": 33.6405,\n        \"lng\": -117.8443\n    },\n    \"satellite\": \"0 ISS (ZARYA)\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host_base}}/prediction",
+					"host": [
+						"{{host_base}}"
+					],
+					"path": [
+						"prediction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Response",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host_base}}/response",
+					"host": [
+						"{{host_base}}"
+					],
+					"path": [
+						"response"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
