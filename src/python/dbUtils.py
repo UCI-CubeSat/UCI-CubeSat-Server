@@ -21,7 +21,6 @@ def dbWrite(entryArray: list):
 
 def dbRead(queryName, *args, **kwargs):
     """
-
     :param queryName: list of query inside dbQueries.py
     :param args: pass parameter into SQL query
     :param kwargs: return a dict-like object if dict=true, else return a list of tuple

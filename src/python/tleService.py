@@ -5,14 +5,14 @@ from datetime import datetime
 
 from pymemcache.client import base
 
-from src.python import dbModel, dbUtils, satnogs, appConfig
+from src.python import dbModel, dbUtils, satnogsService, appConfig
 
 # config for memcache
 client = base.Client(('localhost', 11211))
 
 
 def getTLE() -> {dict}:
-    tleList = satnogs.tleFilter(satnogs.sortMostRecent(satnogs.getSatellites()))
+    tleList = satnogsService.tleFilter(satnogsService.sortMostRecent(satnogsService.getSatellites()))
     keys = [tle['tle0'] for tle in tleList]
     return dict(zip(keys, tleList))
 

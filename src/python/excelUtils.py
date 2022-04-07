@@ -2,14 +2,14 @@ from datetime import datetime
 
 import openpyxl
 
-from src.python import filepath, satnogs
+from src.python import filepathUtils, satnogsService
 
 TABS = {0: "allSatellite", 1: "filteredSatellite", 2: "sortedSatellite", 3: "TLE"}
-FILE_DIR = filepath.getRoot() + "/CubeSAT/satnogs" + str(datetime.now().date()) + ".xlsx"
-DATA_0 = satnogs.getSatellites()
-DATA_1 = satnogs.satelliteFilter(DATA_0)
-DATA_2 = satnogs.sortMostRecent(DATA_1)
-TLE = satnogs.tleFilter(DATA_2)
+FILE_DIR = filepathUtils.getRoot() + "/CubeSAT/satnogs" + str(datetime.now().date()) + ".xlsx"
+DATA_0 = satnogsService.getSatellites()
+DATA_1 = satnogsService.satelliteFilter(DATA_0)
+DATA_2 = satnogsService.sortMostRecent(DATA_1)
+TLE = satnogsService.tleFilter(DATA_2)
 DATA = [DATA_0, DATA_1, DATA_2, TLE]
 
 

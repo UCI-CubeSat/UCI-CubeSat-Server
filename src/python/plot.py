@@ -6,7 +6,7 @@ from matplotlib import pyplot, animation
 from matplotlib.animation import FuncAnimation
 from skyfield.toposlib import wgs84
 
-from src.python import calculation, tle
+from src.python import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 
@@ -27,9 +27,9 @@ def getColor():
 
 def getAllSat():
     satellites = list()
-    response = tle.loadTLE()
+    response = tleService.loadTLE()
     for k in response.keys():
-        satellites.append(calculation.getPath(response[k], "latlong", DURATION, RESOLUTION))
+        satellites.append(skyfieldService.getPath(response[k], "latlong", DURATION, RESOLUTION))
     # for debug
     # print(len(satellites), satellites[0])
     return satellites
