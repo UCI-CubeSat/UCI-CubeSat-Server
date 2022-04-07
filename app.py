@@ -70,5 +70,11 @@ def getHorizon():
     return predictedPass
 
 
+@app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['POST'])
+def addEmailSubscriber():
+    # TODO: integrate with React.js frontend /src/components/emailSignup.js
+    pass
+
+
 if __name__ == '__main__':
     app.run(debug=True)
