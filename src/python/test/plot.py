@@ -6,7 +6,7 @@ from matplotlib import pyplot, animation
 from matplotlib.animation import FuncAnimation
 from skyfield.toposlib import wgs84
 
-from src.python import skyfieldService, tleService
+from src.python.service import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 

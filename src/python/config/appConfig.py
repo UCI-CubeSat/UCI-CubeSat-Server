@@ -9,9 +9,9 @@ from flask_cors import CORS
 import logging
 
 # logging config setting
-logLevel = logging.DEBUG
-logOverwrite = 'w'
-logging.basicConfig(filename='server.log', encoding='utf-8', level=logLevel)
+# logLevel = logging.ERROR
+# logOverwrite = 'w'
+# logging.basicConfig(filename='error.log', encoding='utf-8', level=logLevel)
 
 # db/memcache config setting
 enableDB = True
@@ -24,6 +24,8 @@ CORS(app)
 # load secret from .env
 load_dotenv()
 dbUrl = os.getenv('DB_URL')
+bingMapApiKey = os.getenv('BING_MAP_API_KEY')
+satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')
 
 # sqlalchemy db config setting
 app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl

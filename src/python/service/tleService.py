@@ -5,14 +5,16 @@ from datetime import datetime
 
 from pymemcache.client import base
 
-from src.python import dbModel, dbUtils, satnogsService, appConfig
+from src.python.database import dbUtils, dbModel
+from src.python.config import appConfig
+from src.python.service import satnogsService
 
 # config for memcache
 client = base.Client(('localhost', 11211))
 
 
 def getTLE() -> {dict}:
-    tleList = satnogsService.tleFilter(satnogsService.sortMostRecent(satnogsService.getSatellites()))
+    tleList = satnogsService.tleFilter(satnogsService.sortMostRecent(satnogsService.getSatellite()))
     keys = [tle['tle0'] for tle in tleList]
     return dict(zip(keys, tleList))
 
@@ -74,7 +76,7 @@ def readMemcache():
 
     logging.info("LOGGING: cache hit")
     data = dict()
-    keySet = ast.literal_eval((client.get("keySet")).decode("utf-8"))
+    keySet: list = ast.literal_eval((client.get("keySet")).decode("utf-8"))
 
     for key in keySet:
         value = client.get(key.replace(" ", "_")).decode("utf-8")  # byte -> str
@@ -95,27 +97,27 @@ def writeDB(data):
     if not appConfig.enableDB:
         return
 
-    data = [dbModel.tle_create_row(key, data[key]['tle1'], data[key]['tle2'],
-                                   datetime.now()) for key in data.keys()]
-    dbUtils.dbWrite(data)
-    dbUtils.dbClose()
+    data: list = [dbModel.TwoLineElement.insertRow(data[key]['tle1'], data[key]['tle2'],
+                                                   datetime.now()) for key in data.keys()]
+    dbUtils.dbInsertAll("tle", data)
+    dbUtils.dbCloseConnection()
 
 
 def readDB():
     if not appConfig.enableDB:
         return saveTLE()
 
-    if not dbUtils.dbRead("get_tle_timestamp"):
+    if not dbUtils.dbFetchAll("get_tle_timestamp"):
         return saveTLE()
 
-    timestamp, = dbUtils.dbRead("get_tle_timestamp")
+    timestamp, = dbUtils.dbFetchAll("get_tle_timestamp")
     if not isRecent(timestamp):
         logging.warning("WARNING: db outdated")
         return saveTLE()
 
-    dbData: dict = dbUtils.dbRead("find_tle_all", dict=True)
+    dbData: dict = dbUtils.dbFetchAll("find_tle_all", dict=True)
     data: dict = dict(zip([tle['tle0'] for tle in dbData], [dict(kv) for kv in dbData]))
-    dbUtils.dbClose()
+    dbUtils.dbCloseConnection()
 
     if data:
         writeMemcache(data)
@@ -152,6 +154,6 @@ if __name__ == "__main__":
     # change setting
     appConfig.enableDB = True
     appConfig.enableMemcache = False
-    # test
-    for i in range(5):
+    # test db clear/read/write
+    for _ in range(10):
         print(loadTLE())

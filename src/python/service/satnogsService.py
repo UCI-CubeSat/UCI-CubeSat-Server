@@ -1,16 +1,16 @@
 import requests
+from src.python.config import appConfig
 
-KEY = "36ff1b885dafa497e93073092cdac1c9887e510c"
-TRANSMITTER_URL = "https://db.satnogs.org/api/transmitters/?key=36ff1b885dafa497e93073092cdac1c9887e510c&format=json"
-SATELLITE_URL = "https://db.satnogs.org/api/satellites/?key=36ff1b885dafa497e93073092cdac1c9887e510c&format=json"
-TLE_URL = "https://db.satnogs.org/api/tle/?key=36ff1b885dafa497e93073092cdac1c9887e510c&format=json"
+TRANSMITTER_URL = f"https://db.satnogs.org/api/transmitters/?key={appConfig.satnogsApiKey}&format=json"
+SATELLITE_URL = f"https://db.satnogs.org/api/satellites/?key={appConfig.satnogsApiKey}&format=json"
+TLE_URL = f"https://db.satnogs.org/api/tle/?key=key={appConfig.satnogsApiKey}&format=json"
 
 
-def getID() -> set:
+def getIdentifier() -> set:
     return {sat["norad_cat_id"] for sat in requests.get(SATELLITE_URL).json()}
 
 
-def getSatellites() -> [dict]:
+def getSatellite() -> [dict]:
     """
     :return: A list of all available Satellite's basic info from Satnogs
     """
@@ -23,7 +23,7 @@ def getSatellites() -> [dict]:
             for s in requests.get(TRANSMITTER_URL).json() if s["alive"]]
 
 
-def getTLE() -> {dict}:
+def getTwoLineElement() -> {dict}:
     """
     :return: A list of all available Satellite's TLE from Satnogs
     """
@@ -57,7 +57,7 @@ def sortMostRecent(satelliteList: [dict], recent: bool = True) -> [dict]:
             if int(sat["time"][0:4]) >= 2021]
 
 
-def getNoradID(satelliteList: [dict]) -> {str}:
+def getNoradId(satelliteList: [dict]) -> {str}:
     """
     get a set of NoradID from dict, using set to improve
     search performance from O(n) to O(1)
@@ -75,5 +75,5 @@ def tleFilter(satelliteList: [dict]) -> [dict]:
     :return: List of Satellite's TLE information from Satnogs
     """
 
-    return [sat for sat in getTLE().values() if sat["norad_cat_id"] in getNoradID(satelliteList)]
+    return [sat for sat in getTwoLineElement().values() if sat["norad_cat_id"] in getNoradId(satelliteList)]
 

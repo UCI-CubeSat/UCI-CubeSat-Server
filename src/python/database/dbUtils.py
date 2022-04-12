@@ -1,25 +1,19 @@
 import psycopg2
 import psycopg2.extras
 
-from src.python import appConfig, dbModel, dbQueries
+from src.python.database import dbModel, dbQueries
+from src.python.config import appConfig
 
 
-# TODO:
-#  Switch all DB operation from using SQLAlchemy to psycopg2
-#  Need to handle unexpected closed connection, restart connection
+def dbInsertAll(tableName, entryArray: list):
+    dbTruncateTable(tableName)
 
-
-def dbWrite(entryArray: list):
-    dbCursor = appConfig.dbConnection.cursor()
-    dbCursor.execute(dbQueries.queries["truncate_table_by_name"]("tle"))
-    appConfig.dbConnection.commit()
-
-    for entry in entryArray:  # This is still using SQLAlchemy
+    for entry in entryArray:
         dbModel.db.session.add(entry)
     dbModel.db.session.commit()
 
 
-def dbRead(queryName, *args, **kwargs):
+def dbFetchAll(queryName, *args, **kwargs):
     """
     :param queryName: list of query inside dbQueries.py
     :param args: pass parameter into SQL query
@@ -30,6 +24,7 @@ def dbRead(queryName, *args, **kwargs):
         dbCursor = appConfig.dbConnection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     else:
         dbCursor = appConfig.dbConnection.cursor()
+
     try:
         if args:
             dbCursor.execute(dbQueries.queries[queryName](args))
@@ -54,5 +49,5 @@ def dbTruncateTable(tableName):
     appConfig.dbConnection.commit()
 
 
-def dbClose():
+def dbCloseConnection():
     dbModel.db.close_all_sessions()

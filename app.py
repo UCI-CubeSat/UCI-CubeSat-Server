@@ -2,9 +2,11 @@ import flask
 import requests
 from flask import request
 from skyfield.toposlib import wgs84
+import urllib
 
-from src.python import skyfieldService, bingMapService, satnogsService, tleService, appConfig
-from src.python.appConfig import app
+from src.python.config import appConfig
+from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
+from src.python.config.appConfig import app
 
 
 @app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
@@ -70,7 +72,7 @@ def getHorizon():
     return predictedPass
 
 
-@app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['POST'])
+@app.route(f'{appConfig.apiBaseUrl}/emailSignup', methods=['POST'])
 def addEmailSubscriber():
     # TODO: integrate with React.js frontend /src/components/emailSignup.js
     pass
