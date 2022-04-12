@@ -37,37 +37,42 @@ def getAvailableSatellite():
 
 @app.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
 def getSatelliteState():
-    name = request.args.get("tle0", default="AmicalSat", type=str).upper()
+    name = request.args.get("name", default="AmicalSat", type=str).upper()
+    duration = request.args.get("duration", default=3600.0, type=float)
     data = tleService.loadTLE()
 
     try:
         satellite_tle = data[name] if name in data.keys() else data[f'0 {name}']
     except KeyError:
-        return flask.jsonify(None)
+        return flask.jsonify({})
 
-    response = skyfieldService.getSphericalPath(satellite_tle, 1.0, 60.0 / 60.0)
+    response = skyfieldService.getSphericalPath(satellite_tle, duration, 60.0 / 60.0)
     currLatLng: tuple = response["origin"]
     currLatPath: list = response["latArray"]
-    currLngPath: list = response["longArray"]
+    currLngPath: list = response["lngArray"]
+    currLatLngPath: list = response["latLngArray"]
     return flask.jsonify({"latLng": {"lat": currLatLng[0], "lng": currLatLng[1]},
                           "latPath": list(currLatPath),
-                          "lngPath": list(currLngPath)
+                          "lngPath": list(currLngPath),
+                          "latLngPath": currLatLngPath
                           })
 
 
-@app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['POST'])
+@app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['GET'])
 def getHorizon():
-    selectedSatellite = request.get_json().get('satellite')
-    rxLatLng = request.get_json().get('rxLatLng')
-    rxLat = rxLatLng['lat']
-    rxLong = rxLatLng['lng']
-    rxElevation = 0
-    predictionDuration = 1 * 24 * 3600
+    satellite = urllib.parse.unquote(request.args.get("satellite", default="", type=str))
+    latitude = request.args.get("latitude", type=float)
+    longitude = request.args.get("longitude", type=float)
+    elevation = request.args.get("elevation", default=0, type=int)
+    duration = request.args.get("duration", default=1 * 24 * 3600.0, type=float)
 
-    predictedPass, predictedDict = skyfieldService.findHorizonTime(tleService.loadTLE()[selectedSatellite],
-                                                                   predictionDuration,
-                                                                   wgs84.latlon(rxLat, rxLong,
-                                                                                elevation_m=rxElevation))
+    if satellite == "" or not (longitude and longitude):
+        return flask.jsonify({})
+
+    predictedPass, predictedDict = skyfieldService.findHorizonTime(tleService.loadTLE()[satellite],
+                                                                   duration,
+                                                                   wgs84.latlon(latitude, longitude,
+                                                                                elevation_m=elevation))
 
     return predictedPass
 
