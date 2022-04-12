@@ -97,9 +97,9 @@ def writeDB(data):
     if not appConfig.enableDB:
         return
 
-    data: list = [dbModel.TwoLineElement.insertRow(data[key]['tle1'], data[key]['tle2'],
+    data: list = [dbModel.TwoLineElement.insertRow(key, data[key]['tle1'], data[key]['tle2'],
                                                    datetime.now()) for key in data.keys()]
-    dbUtils.dbInsertAll("tle", data)
+    dbUtils.dbInsertAll("two_line_element", data)
     dbUtils.dbCloseConnection()
 
 
@@ -150,7 +150,7 @@ def loadTLE() -> {dict}:
 if __name__ == "__main__":
     # clear cache && db
     clearMemcache()
-    dbUtils.dbTruncateTable("tle")
+    dbUtils.dbTruncateTable("two_line_element")
     # change setting
     appConfig.enableDB = True
     appConfig.enableMemcache = False
