@@ -1,6 +1,6 @@
 import requests
 
-baseUrl = "http://127.0.0.1:5000/api/v1"
+baseUrl = "https://uci-cubesat-server.herokuapp.com/api/v1"
 
 if __name__ == "__main__":
     predictionUrl = f"{baseUrl}/prediction?satellite=OSCAR%207%20(AO-7)"
