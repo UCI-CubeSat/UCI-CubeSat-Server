@@ -1,11 +1,9 @@
-name: Run Endpoint Tests
+name: Endpoints status check
 on:
   push:
     branches:
-      - main
   pull_request:
     branches:
-      - main
 
 jobs:
   build:
@@ -15,7 +13,7 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "uci-cubesat-server"
+          heroku_app_name: "uci-cubesat-server-dev"
           heroku_email: "chillinthestar@outlook.com"
       - name: Install Python 3
         uses: actions/setup-python@v1
@@ -32,4 +30,10 @@ jobs:
           cd src/python/test
           pip install pytest
           pip install requests
+          pip install datetime
           pytest test_endpoint.py
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "uci-cubesat-server"
+          heroku_email: "chillinthestar@outlook.com"

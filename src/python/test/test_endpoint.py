@@ -2,7 +2,7 @@ import requests
 from src.python.service import tleService
 from datetime import datetime
 
-baseUrl = "https://uci-cubesat-server.herokuapp.com/api/v1"
+baseUrl = "https://uci-cubesat-server-dev.herokuapp.com/api/v1"
 tleUrl = f"{baseUrl}/tle"
 heartBeatUrl = f"{baseUrl}/heartbeat"
 availableSatelliteUrl = f"{baseUrl}/available_satellite"
