@@ -7,7 +7,9 @@ heartBeatUrl = f"{baseUrl}/heartbeat"
 availableSatelliteUrl = f"{baseUrl}/available_satellite"
 
 
-def isRecent(timestamp: datetime) -> bool:
+def isRecent(timestamp: str) -> bool:
+    timestamp = datetime.strptime(
+        timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
     return (
                datetime.now() -
                timestamp).days == 0 and (
@@ -20,7 +22,7 @@ def testStatus():
     assert getStatus.json()["status"] == "online"
     assert getStatus.json()["satnogs"]["status"] == "online"
     assert getStatus.json()["database"]["status"] == "online"
-    assert isRecent(datetime(getStatus.json()["database"]["updated"]))
+    assert isRecent(getStatus.json()["database"]["updated"])
 
 
 def testTle():
