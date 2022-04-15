@@ -25,4 +25,5 @@ jobs:
       - name: Run test with pytest
         run: |
           cd src/python/test
+          pip install pytest
           pytest test_endpoint.py
