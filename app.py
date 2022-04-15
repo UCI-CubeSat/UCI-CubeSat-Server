@@ -10,8 +10,26 @@ from src.python.config.appConfig import app
 
 
 @app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
-def getResponse():
-    return flask.jsonify(requests.get(satnogsService.TLE_URL).json())
+def getServerStatus():
+    satnogsRequest = requests.get(satnogsService.TLE_URL)
+    dbRequest: dict = tleService.loadTLE()
+    try:
+        response = flask.jsonify({
+            "status": "online",
+            "satnogs": {
+                "status": "online" if satnogsRequest.status_code == 200 else "offline"
+            },
+            "database": {
+                "status": "online" if len(dbRequest) != 0 else "offline",
+                "length": len(dbRequest),
+                "updated": dbRequest["updated"]
+            }
+        })
+    except Exception as error:
+        response = flask.jsonify({"status": str(error)})
+
+    return response
+
 
 
 @app.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
