@@ -6,7 +6,7 @@ Hailey Lin: weixil4@uci.edu,
 
 Jiaen Zhang: jiaenz@uci.edu,
 
-Ruby Tsai, Gabrielle Palar
+Yi-Ju Tsai, Gabrielle Palar
 
 Make sure you have `python3`, `pip3` installed
 
