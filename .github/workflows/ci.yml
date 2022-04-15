@@ -1,0 +1,28 @@
+name: Run Endpoint Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.10
+      - name: Install dependencies on Venv
+        run: |
+          python3 -m venv ./venv;
+          source ./venv/bin/activate;
+          pip3 install --upgrade pip;
+          pip3 install -r "requirements.txt";
+      - name: Run test with pytest
+        run: |
+          cd src/python/test
+          pytest test_endpoint.py
