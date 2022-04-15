@@ -26,4 +26,5 @@ jobs:
         run: |
           cd src/python/test
           pip install pytest
+          pip install requests
           pytest test_endpoint.py
