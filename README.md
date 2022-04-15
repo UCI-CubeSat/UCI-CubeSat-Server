@@ -24,14 +24,13 @@ Setup `venv` virtualenv
 
 ## Connecting to our SQL Database
 
-`brew install postgresql`
+`brew install postgresql` for macOS
 
-`pip install psycopg2`
+`choco install postgresql` for Windows
 
-A free SQL database was created on [elephantSQL](https://www.elephantsql.com/)
+A free SQL database instance was created on [elephantSQL](https://www.elephantsql.com/)
 
 Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
-, can also work with other SQL database editor
 
 ```
 Driver: PostgreSQL
