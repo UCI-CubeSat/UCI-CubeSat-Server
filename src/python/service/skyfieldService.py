@@ -8,32 +8,52 @@ from skyfield.timelib import Time
 
 def selectSat(tle: dict, name: str) -> dict:
     if name not in tle.keys():
-        return dict()
+        return {}
 
     return tle[name]
 
 
-def getPath(data: dict, mode: str = "latLng", duration: float = 10 * 3600, resolution: float = 4.0) -> dict:
+def getPath(
+        data: dict,
+        mode: str = "latLng",
+        duration: float = 10 * 3600,
+        resolution: float = 4.0) -> dict:
     return getSphericalPath(data, duration, resolution) if mode == "latLng" \
         else getCartesianPath(data, duration, resolution)
 
 
 def getSphericalPath(data: dict, duration: float, resolution: float) -> dict:
-    response = dict()
-    satellite = EarthSatellite(data["tle1"], data["tle2"], data["tle0"], load.timescale())
+    response = {}
+    satellite = EarthSatellite(
+        data["tle1"],
+        data["tle2"],
+        data["tle0"],
+        load.timescale())
     ts = load.timescale()
     t = ts.now()
     start = t.utc.second
 
-    interval = ts.utc(t.utc.year, t.utc.month, t.utc.day, t.utc.hour, t.utc.minute,
-                      numpy.arange(start, start + duration, resolution * 60))
+    interval = ts.utc(
+        t.utc.year,
+        t.utc.month,
+        t.utc.day,
+        t.utc.hour,
+        t.utc.minute,
+        numpy.arange(
+            start,
+            start +
+            duration,
+            resolution *
+            60))
     location = satellite.at(interval)
     path = wgs84.subpoint(location)
 
     response["timestamp"]: datetime.time = t.utc
     response["identifier"]: str = data["tle0"]
-    response["origin"]: tuple = (wgs84.subpoint(satellite.at(t)).latitude.degrees,
-                                 wgs84.subpoint(satellite.at(t)).longitude.degrees)
+    response["origin"]: tuple = (
+        wgs84.subpoint(
+            satellite.at(t)).latitude.degrees, wgs84.subpoint(
+            satellite.at(t)).longitude.degrees)
     response["latArray"]: numpy.array = path.latitude.degrees
     response["lngArray"]: numpy.array = path.longitude.degrees
     response["latLngArray"]: list = [[response["latArray"][index], response["lngArray"][index]]
@@ -45,21 +65,38 @@ def getSphericalPath(data: dict, duration: float, resolution: float) -> dict:
 
 
 def getCartesianPath(data, duration, resolution):
-    response = dict()
-    satellite = EarthSatellite(data["tle1"], data["tle2"], data["tle0"], load.timescale())
+    response = {}
+    satellite = EarthSatellite(
+        data["tle1"],
+        data["tle2"],
+        data["tle0"],
+        load.timescale())
     ts = load.timescale()
     t = ts.now()
     start = t.utc.second
 
-    interval = ts.utc(t.utc.year, t.utc.month, t.utc.day, t.utc.hour, t.utc.minute,
-                      numpy.arange(start, start + duration, resolution * 60))
+    interval = ts.utc(
+        t.utc.year,
+        t.utc.month,
+        t.utc.day,
+        t.utc.hour,
+        t.utc.minute,
+        numpy.arange(
+            start,
+            start +
+            duration,
+            resolution *
+            60))
     location = satellite.at(interval)
     d = numpy.array([])
 
     for i in range(len(location.position.km[0])):
-        numpy.append(d, (numpy.linalg.norm(numpy.array(
-            [location.position.km[0][i], location.position.km[1][i], location.position.km[2][i]])
-                                           - numpy.array([0, 0, 0]))))
+        numpy.append(d,
+                     (numpy.linalg.norm(numpy.array([location.position.km[0][i],
+                                                     location.position.km[1][i],
+                                                     location.position.km[2][i]]) - numpy.array([0,
+                                                                                                 0,
+                                                                                                 0]))))
 
     response["identifier"]: str = data["tle0"]
     response["x"]: numpy.array = location.position.km[0]
@@ -81,26 +118,59 @@ def getSerializedPath(data: dict):
     return data
 
 
-def findHorizonTime(data, duration, receiverLocation: wgs84.latlon) -> json:
-    satellite = EarthSatellite(data["tle1"], data["tle2"], data["tle0"], load.timescale())
+def findHorizonTime(
+        data: list,
+        duration: float,
+        receiverLocation: wgs84.latlon) -> json:
+    satellite = EarthSatellite(
+        data["tle1"],
+        data["tle2"],
+        data["tle0"],
+        load.timescale())
     timestamp = load.timescale()
     start = load.timescale().now()
 
-    end = timestamp.utc(start.utc.year, start.utc.month, start.utc.day, start.utc.hour, start.utc.minute,
-                        start.utc.second + duration)
-    condition = {"bare": 1.0, "marginal": 30.0, "good": 45.0, "excellent": 60.0}
+    end = timestamp.utc(
+        start.utc.year,
+        start.utc.month,
+        start.utc.day,
+        start.utc.hour,
+        start.utc.minute,
+        start.utc.second +
+        duration)
+    condition = {
+        "bare": 1.0,
+        "marginal": 30.0,
+        "good": 45.0,
+        "excellent": 60.0}
     degree = condition["bare"]  # peak is at 90
-    timestampUtc, events = satellite.find_events(receiverLocation, start, end, altitude_degrees=degree)
+    timestampUtc, events = satellite.find_events(
+        receiverLocation, start, end, altitude_degrees=degree)
 
     if not numpy.array_equal(events[:1], [0]):
-        start = timestamp.utc(start.utc.year, start.utc.month, start.utc.day, start.utc.hour, start.utc.minute,
-                              start.utc.second - 15 * 60)
-        timestampUtc, events = satellite.find_events(receiverLocation, start, end, altitude_degrees=degree)
+        start = timestamp.utc(
+            start.utc.year,
+            start.utc.month,
+            start.utc.day,
+            start.utc.hour,
+            start.utc.minute,
+            start.utc.second - 15 * 60)
+        timestampUtc, events = satellite.find_events(
+            receiverLocation, start, end, altitude_degrees=degree)
 
     if not numpy.array_equal(events[-1:], [2]):
-        end = timestamp.utc(start.utc.year, start.utc.month, start.utc.day, start.utc.hour, start.utc.minute,
-                            start.utc.second + duration + 15 * 60)
-        timestampUtc, events = satellite.find_events(receiverLocation, start, end, altitude_degrees=degree)
+        end = timestamp.utc(
+            start.utc.year,
+            start.utc.month,
+            start.utc.day,
+            start.utc.hour,
+            start.utc.minute,
+            start.utc.second +
+            duration +
+            15 *
+            60)
+        timestampUtc, events = satellite.find_events(
+            receiverLocation, start, end, altitude_degrees=degree)
     timestampUtc = list(timestampUtc)
 
     if events.size == 0:
@@ -174,14 +244,28 @@ def findHorizonTime(data, duration, receiverLocation: wgs84.latlon) -> json:
             datetime_rise = Time.utc_datetime(formattedTimeStamps[index])
             datetime_peak = Time.utc_datetime(formattedTimeStamps[index + 1])
             datetime_set = Time.utc_datetime(formattedTimeStamps[index + 2])
-            t0 = timestamp.utc(datetime_rise.year, datetime_rise.month, datetime_rise.day, datetime_rise.hour,
-                               datetime_rise.minute, datetime_rise.second)
+            t0 = timestamp.utc(
+                datetime_rise.year,
+                datetime_rise.month,
+                datetime_rise.day,
+                datetime_rise.hour,
+                datetime_rise.minute,
+                datetime_rise.second)
 
-            diff = numpy.float64((datetime_set - datetime_rise).total_seconds())
+            diff = numpy.float64(
+                (datetime_set - datetime_rise).total_seconds())
             t0Sec = t0.utc.second
             t1Sec = t0Sec + diff
-            eventDuration = timestamp.utc(t0.utc.year, t0.utc.month, t0.utc.day, t0.utc.hour, t0.utc.minute,
-                                          numpy.arange(t0Sec, t1Sec, 60))
+            eventDuration = timestamp.utc(
+                t0.utc.year,
+                t0.utc.month,
+                t0.utc.day,
+                t0.utc.hour,
+                t0.utc.minute,
+                numpy.arange(
+                    t0Sec,
+                    t1Sec,
+                    60))
             eventTimeArray = eventDuration.utc_strftime('%Y %b %d %H:%M:%S')
 
             retJson[str(datetime_peak)] = json.dumps({'rise': str(eventTimeArray[0]),

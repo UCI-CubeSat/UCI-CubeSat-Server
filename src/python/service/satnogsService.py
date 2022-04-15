@@ -14,7 +14,8 @@ def getSatellite() -> [dict]:
     """
     :return: A list of all available Satellite's basic info from Satnogs
     """
-    sat = {s["norad_cat_id"]: s["name"] for s in requests.get(SATELLITE_URL).json()}
+    sat = {s["norad_cat_id"]: s["name"]
+           for s in requests.get(SATELLITE_URL).json()}
 
     return [{"name": sat[s["norad_cat_id"]], "description": s["description"],
              "norad_cat_id": s["norad_cat_id"],
@@ -31,7 +32,10 @@ def getTwoLineElement() -> {dict}:
     return {tle["tle0"]: tle for tle in requests.get(TLE_URL).json()}
 
 
-def satelliteFilter(satelliteList: [dict], mode: str = "AFSK", baud: int = 1200) -> [dict]:
+def satelliteFilter(
+        satelliteList: [dict],
+        mode: str = "AFSK",
+        baud: int = 1200) -> [dict]:
     """
     filter the list of satellite by modulation mode and baud rate
     :param satelliteList: List of Satellite information from Satnogs
@@ -53,8 +57,9 @@ def sortMostRecent(satelliteList: [dict], recent: bool = True) -> [dict]:
     """
 
     # sort the list of satellite by timestamp (last known communication)
-    return [sat for sat in sorted(satelliteList, key=lambda x: x["time"], reverse=recent)
-            if int(sat["time"][0:4]) >= 2021]
+    return [sat for sat in sorted(satelliteList,
+                                  key=lambda x: x["time"],
+                                  reverse=recent) if int(sat["time"][0:4]) >= 2021]
 
 
 def getNoradId(satelliteList: [dict]) -> {str}:
@@ -75,5 +80,5 @@ def tleFilter(satelliteList: [dict]) -> [dict]:
     :return: List of Satellite's TLE information from Satnogs
     """
 
-    return [sat for sat in getTwoLineElement().values() if sat["norad_cat_id"] in getNoradId(satelliteList)]
-
+    return [sat for sat in getTwoLineElement().values(
+    ) if sat["norad_cat_id"] in getNoradId(satelliteList)]

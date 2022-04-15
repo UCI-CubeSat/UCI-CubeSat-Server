@@ -14,7 +14,9 @@ client = base.Client(('localhost', 11211))
 
 
 def getTLE() -> {dict}:
-    tleList = satnogsService.tleFilter(satnogsService.sortMostRecent(satnogsService.getSatellite()))
+    tleList = satnogsService.tleFilter(
+        satnogsService.sortMostRecent(
+            satnogsService.getSatellite()))
     keys = [tle['tle0'] for tle in tleList]
     return dict(zip(keys, tleList))
 
@@ -23,12 +25,17 @@ def isRecent(timestamp: datetime) -> bool:
     if timestamp is None:
         return False
 
-    if not type(timestamp) is datetime:
-        lastTimestamp = datetime.strptime(timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
+    if not isinstance(timestamp, datetime):
+        lastTimestamp = datetime.strptime(
+            timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
     else:
         lastTimestamp = timestamp
     currentTimestamp: datetime = datetime.now()
-    return (currentTimestamp - lastTimestamp).days == 0 and (currentTimestamp - lastTimestamp).seconds < 86400
+    return (
+        currentTimestamp -
+        lastTimestamp).days == 0 and (
+        currentTimestamp -
+        lastTimestamp).seconds < 86400
 
 
 def clearMemcache():
@@ -75,11 +82,12 @@ def readMemcache():
         return None
 
     logging.info("LOGGING: cache hit")
-    data = dict()
+    data = {}
     keySet: list = ast.literal_eval((client.get("keySet")).decode("utf-8"))
 
     for key in keySet:
-        value = client.get(key.replace(" ", "_")).decode("utf-8")  # byte -> str
+        value = client.get(key.replace(" ", "_")).decode(
+            "utf-8")  # byte -> str
         # TODO:
         #  ast.literal_eval is crashing here, if appConfig.enableMemcache = True
         #  we keep track of when data is last fetch, db and memcache is using
@@ -97,8 +105,12 @@ def writeDB(data):
     if not appConfig.enableDB:
         return
 
-    data: list = [dbModel.TwoLineElement.insertRow(key, data[key]['tle1'], data[key]['tle2'],
-                                                   datetime.now()) for key in data.keys()]
+    data: list = [
+        dbModel.TwoLineElement.insertRow(
+            key,
+            data[key]['tle1'],
+            data[key]['tle2'],
+            datetime.now()) for key in data.keys()]
     dbUtils.dbInsertAll("two_line_element", data)
     dbUtils.dbCloseConnection()
 
@@ -116,14 +128,15 @@ def readDB():
         return saveTLE()
 
     dbData: dict = dbUtils.dbFetchAll("find_tle_all", dict=True)
-    data: dict = dict(zip([tle['tle0'] for tle in dbData], [dict(kv) for kv in dbData]))
+    data: dict = dict(zip([tle['tle0']
+                      for tle in dbData], [dict(kv) for kv in dbData]))
     dbUtils.dbCloseConnection()
 
     if data:
         writeMemcache(data)
         return data
-    else:
-        return saveTLE()
+
+    return saveTLE()
 
 
 def saveTLE() -> {dict}:

@@ -26,7 +26,7 @@ def getColor():
 
 
 def getAllSat():
-    satellites = list()
+    satellites = []
     response = tleService.loadTLE()
     for k in response.keys():
         satellites.append(skyfieldService.getPath(response[k], "latlong", DURATION, RESOLUTION))

@@ -21,7 +21,8 @@ def dbFetchAll(queryName, *args, **kwargs):
     :return:
     """
     if 'dict' in kwargs.keys() and kwargs['dict']:
-        dbCursor = appConfig.dbConnection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        dbCursor = appConfig.dbConnection.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor)
     else:
         dbCursor = appConfig.dbConnection.cursor()
 
@@ -34,7 +35,8 @@ def dbFetchAll(queryName, *args, **kwargs):
         return None
 
     dbResponse: [()] = dbCursor.fetchall()
-    return None if len(dbResponse) == 0 else dbResponse[0] if len(dbResponse) == 1 else dbResponse
+    return None if len(dbResponse) == 0 else dbResponse[0] if len(
+        dbResponse) == 1 else dbResponse
 
 
 def dbDropTable(tableName):

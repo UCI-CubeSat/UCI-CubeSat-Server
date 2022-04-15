@@ -9,8 +9,12 @@ from src.python.config import appConfig
 '''
 
 
-def getLatLong(addressLine="University%20of%20California,%20Irvine", city="Irvine", adminDistrict="CA",
-               postalCode="92697", country="US"):
+def getLatLong(
+        addressLine="University%20of%20California,%20Irvine",
+        city="Irvine",
+        adminDistrict="CA",
+        postalCode="92697",
+        country="US"):
     returnFormat = "json"
     url = f'https://dev.virtualearth.net/REST/v1/Locations/' \
           f'{urllib.parse.quote_plus(country)}' \
