@@ -22,7 +22,7 @@ def getServerStatus():
             "database": {
                 "status": "online" if len(dbRequest) != 0 else "offline",
                 "length": len(dbRequest),
-                "updated": dbRequest["updated"]
+                "updated": dbRequest[list(dbRequest.keys())[0]]["updated"]
             }
         })
     except Exception as error:
