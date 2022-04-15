@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install PostgreSQL client
-          run: |
-            sudo apt-get update
-            sudo apt-get install --yes postgresql-client
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "uci-cubesat-server"
+          heroku_email: "chillinthestar@outlook.com"
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
@@ -32,8 +33,3 @@ jobs:
           pip install pytest
           pip install requests
           pytest test_endpoint.py
-      - uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "uci-cubesat-server"
-          heroku_email: "chillinthestar@outlook.com"
