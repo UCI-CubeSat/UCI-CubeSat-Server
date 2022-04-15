@@ -1,5 +1,4 @@
 import requests
-from src.python.service import tleService
 from datetime import datetime
 
 baseUrl = "https://uci-cubesat-server-dev.herokuapp.com/api/v1"
@@ -8,12 +7,20 @@ heartBeatUrl = f"{baseUrl}/heartbeat"
 availableSatelliteUrl = f"{baseUrl}/available_satellite"
 
 
+def isRecent(timestamp: datetime) -> bool:
+    return (
+               datetime.now() -
+               timestamp).days == 0 and (
+               datetime.now() -
+               timestamp).seconds < 86400
+
+
 def testStatus():
     getStatus = requests.get(heartBeatUrl)
     assert getStatus.json()["status"] == "online"
     assert getStatus.json()["satnogs"]["status"] == "online"
     assert getStatus.json()["database"]["status"] == "online"
-    assert tleService.isRecent(datetime(getStatus.json()["database"]["updated"]))
+    assert isRecent(datetime(getStatus.json()["database"]["updated"]))
 
 
 def testTle():
