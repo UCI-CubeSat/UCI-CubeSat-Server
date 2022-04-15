@@ -26,7 +26,7 @@ def getServerStatus():
             }
         })
     except Exception as error:
-        response = flask.jsonify({"status": str(error)})
+        response = flask.jsonify({"status": str(f"{str(type(error))}: {error}")})
 
     return response
 
