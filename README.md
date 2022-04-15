@@ -1,4 +1,4 @@
-# CubeSAT Satellite Server Dashboard
+# UCI CubeSat Backend Flask Server
 
 Make sure you have `python3`, `pip3` installed
 
