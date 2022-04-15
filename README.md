@@ -1,5 +1,13 @@
 # UCI CubeSat Backend Flask Server
 
+Contributor:
+
+Hailey Lin: weixil4@uci.edu,
+
+Jiaen Zhang: jiaenz@uci.edu,
+
+Ruby Tsai, Gabrielle Palar
+
 Make sure you have `python3`, `pip3` installed
 
 The deployed Python server runs on `python-3.10.4`
