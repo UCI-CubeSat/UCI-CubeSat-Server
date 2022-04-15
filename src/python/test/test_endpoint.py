@@ -9,7 +9,7 @@ availableSatelliteUrl = f"{baseUrl}/available_satellite"
 
 def isRecent(timestamp: str) -> bool:
     timestamp = datetime.strptime(
-        timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
+        timestamp, '%Y-%m-%d %H:%M:%S.%f')
     return (
                datetime.now() -
                timestamp).days == 0 and (
