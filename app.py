@@ -31,7 +31,6 @@ def getServerStatus():
     return response
 
 
-
 @app.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
 def getPayload():
     return flask.jsonify(tleService.loadTLE())
