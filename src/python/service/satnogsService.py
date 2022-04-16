@@ -3,7 +3,7 @@ from src.python.config import appConfig
 
 TRANSMITTER_URL = f"https://db.satnogs.org/api/transmitters/?key={appConfig.satnogsApiKey}&format=json"
 SATELLITE_URL = f"https://db.satnogs.org/api/satellites/?key={appConfig.satnogsApiKey}&format=json"
-TLE_URL = f"https://db.satnogs.org/api/tle/?key=key={appConfig.satnogsApiKey}&format=json"
+TLE_URL = f"https://db.satnogs.org/api/tle/?key={appConfig.satnogsApiKey}&format=json"
 
 
 def getIdentifier() -> set:
