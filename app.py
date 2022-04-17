@@ -9,6 +9,21 @@ from src.python.service import bingMapService, skyfieldService, satnogsService, 
 from src.python.config.appConfig import app
 
 
+@app.route(f'/', methods=['GET'])
+def getHomePage():
+    return flask.jsonify({
+        "Name": "UCI CubeSat Flask Server",
+        "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
+        "Endpoint": {"GET": [
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/heartbeat",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/tle",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/states",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/prediction",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/available_satellite",
+        ]}
+    })
+
+
 @app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
 def getServerStatus():
     satnogsRequest = requests.get(satnogsService.TLE_URL)
