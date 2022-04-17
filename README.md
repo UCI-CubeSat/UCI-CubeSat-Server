@@ -16,6 +16,28 @@ The deployed Python server runs on `python-3.10.4`
 
 Double check `Python3` and `Pip3` are installed
 
+[Homebrew installation for macOS](https://brew.sh/)
+
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+
+`brew install git`
+
+`brew install python@3.10`
+
+[Chocolatey installation for Windows](https://chocolatey.org/install)
+
+`Run Powershell as Admin`
+
+`Set-ExecutionPolicy AllSigned`
+
+`Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+
+verify `chocolatey` is installed: `choco -?`
+
+`choco install git`
+
+`choco install python --version=3.10.2`
+
 ## Setting up the Python/Flask Backend Server locally
 
 Setup `venv` virtualenv
@@ -24,7 +46,7 @@ Setup `venv` virtualenv
 
 `python3 -m venv venv`
 
-`. venv/bin/activate`
+`. venv/bin/activate` for macOS/Linux or `\Scripts\activate` for Windows
 
 `pip install -r 'requirements.txt'`
 
