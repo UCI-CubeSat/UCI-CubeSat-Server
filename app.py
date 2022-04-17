@@ -13,7 +13,14 @@ from src.python.config.appConfig import app
 def getHomePage():
     return flask.jsonify({
         "Name": "UCI CubeSat Flask Server",
-        "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server"
+        "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
+        "Endpoint": {"GET": [
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/heartbeat",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/tle",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/states",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/prediction",
+            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/available_satellite",
+        ]}
     })
 
 
