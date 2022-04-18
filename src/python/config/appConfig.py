@@ -23,11 +23,13 @@ CORS(app)
 
 # load secret from .env
 load_dotenv()
-dbUrl = os.getenv('DB_URL')
+dbUrl = os.getenv("DATABASE_URL")
+dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
 bingMapApiKey = os.getenv('BING_MAP_API_KEY')
 satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')
 
 # sqlalchemy db config setting
+# f"postgresql{s[8:]}"
 app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
