@@ -3,6 +3,7 @@ import requests
 from flask import request
 from skyfield.toposlib import wgs84
 import urllib
+import time
 
 from src.python.config import appConfig
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
@@ -127,6 +128,32 @@ def getHorizon():
 def addEmailSubscriber():
     # TODO: integrate with React.js frontend /src/components/emailSignup.js
     pass
+
+
+@app.route(f'{appConfig.apiBaseUrl}/performance', methods=['GET'])
+def performanceMetric():
+    duration = request.args.get("duration", default=3600.0 * 24, type=float)
+
+    t = time.perf_counter()
+    kvSet = tleService.loadTLE()
+    initialLoadTime = time.perf_counter() - t
+    keySet: list = kvSet.keys()
+    t = time.perf_counter()
+    for satellite in keySet:
+        _, _ = skyfieldService.findHorizonTime(
+            kvSet[satellite], duration, wgs84.latlon(
+                33.6405, -117.8443, elevation_m=0))
+
+    calculationTime = time.perf_counter() - t
+
+    return flask.jsonify({
+        "Initial Load Cost:": initialLoadTime,
+        "Calculation Cost:": calculationTime,
+        "Calculation Size:": {
+            "Duration": f"{duration // 3600} hours",
+            "Number of Satellite:": len(keySet)
+        }
+    })
 
 
 if __name__ == '__main__':
