@@ -74,6 +74,8 @@ and perform any query in CLI
 
 Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
 
+This information changes from time to time, please visit [Heroku Datastore Dashboard](https://data.heroku.com/datastores/22227e07-442e-41ff-8608-e94abc8e1bdf#administration) to see the lastest credential
+
 ```
 Driver: PostgreSQL
 
