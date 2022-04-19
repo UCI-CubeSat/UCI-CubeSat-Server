@@ -64,7 +64,7 @@ Setup `venv` virtualenv
 
 A free SQL database instance was created on [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
 
-Connection via [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+#### Connection via [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 
 `heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev`
 
@@ -72,7 +72,7 @@ and perform any query in CLI
 
 `SELECT * FROM "two_line_element";`
 
-Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
+#### Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
 
 This information changes from time to time, please visit [Heroku Datastore Dashboard](https://data.heroku.com/datastores/22227e07-442e-41ff-8608-e94abc8e1bdf#administration) to see the lastest credential
 
@@ -94,7 +94,7 @@ URI: jdbc:postgresql://ec2-52-73-155-171.compute-1.amazonaws.com:5432/d3cjqhogrc
 Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server
 ```
 
-ElephantSQL DB connection secret is hidden in a `.env` file and stored locally
+Heroku Database connection secret is hidden in a `.env` file and stored locally
 
 Inside `/UCI-CubeSat-Server/.env`
 
