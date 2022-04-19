@@ -62,27 +62,33 @@ Setup `venv` virtualenv
 
 `choco install postgresql` for Windows
 
-A free SQL database instance was created on [elephantSQL](https://www.elephantsql.com/)
+A free SQL database instance was created on [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
 
 Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
 
 ```
 Driver: PostgreSQL
 
-Host: castor.db.elephantsql.com
+Host: ec2-52-73-155-171.compute-1.amazonaws.com
 
-User: omoglffn
+Database: d3cjqhogrcusg1
 
-Password: Ask for password
+User: kfjsvitgcfsmqq
 
-URL: jdbc:postgresql://castor.db.elephantsql.com/
+Port:5432
+
+Password: <PASSWORD>
+
+URI: jdbc:postgresql://ec2-52-73-155-171.compute-1.amazonaws.com:5432/d3cjqhogrcusg1
+
+Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev
 ```
 
 ElephantSQL DB connection secret is hidden in a `.env` file and stored locally
 
 Inside `/UCI-CubeSat-Server/.env`
 
-Paste this line: `DB_URL=postgresql://omoglffn:<PASSWORD_GOES_HERE>@castor.db.elephantsql.com/omoglffn`
+Ask in the discord channel for a copy of the `.env` file
 
 ## Deployment to Heroku
 
