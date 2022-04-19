@@ -91,7 +91,7 @@ Password: <PASSWORD>
 
 URI: jdbc:postgresql://ec2-52-73-155-171.compute-1.amazonaws.com:5432/d3cjqhogrcusg1
 
-Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev
+Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server
 ```
 
 ElephantSQL DB connection secret is hidden in a `.env` file and stored locally
