@@ -64,6 +64,14 @@ Setup `venv` virtualenv
 
 A free SQL database instance was created on [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
 
+Connection via [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
+`heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev`
+
+and perform any query in CLI
+
+`SELECT * FROM "two_line_element";`
+
 Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
 
 ```
