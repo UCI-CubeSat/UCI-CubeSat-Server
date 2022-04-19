@@ -22,6 +22,8 @@ Double check `Python3` and `Pip3` are installed
 
 `brew install git`
 
+`brew install postgresql`
+
 `brew install python@3.10`
 
 [Chocolatey installation for Windows](https://chocolatey.org/install)
@@ -35,6 +37,8 @@ Double check `Python3` and `Pip3` are installed
 verify `chocolatey` is installed: `choco -?`
 
 `choco install git`
+
+`choco install postgresql`
 
 `choco install python --version=3.10.2`
 
