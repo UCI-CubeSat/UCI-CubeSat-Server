@@ -23,8 +23,11 @@ CORS(app)
 
 # load secret from .env
 load_dotenv()
-dbUrl = os.getenv("DATABASE_URL")
-dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
+# Heroku Postgre
+# dbUrl = os.getenv("DATABASE_URL")
+# dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
+# Elephant Postgre
+dbUrl = os.getenv("DB_URL")
 bingMapApiKey = os.getenv('BING_MAP_API_KEY')
 satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')
 
