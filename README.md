@@ -22,6 +22,8 @@ Double check `Python3` and `Pip3` are installed
 
 `brew install git`
 
+`brew install postgresql`
+
 `brew install python@3.10`
 
 [Chocolatey installation for Windows](https://chocolatey.org/install)
@@ -35,6 +37,8 @@ Double check `Python3` and `Pip3` are installed
 verify `chocolatey` is installed: `choco -?`
 
 `choco install git`
+
+`choco install postgresql`
 
 `choco install python --version=3.10.2`
 
@@ -58,27 +62,43 @@ Setup `venv` virtualenv
 
 `choco install postgresql` for Windows
 
-A free SQL database instance was created on [elephantSQL](https://www.elephantsql.com/)
+A free SQL database instance was created on [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
 
-Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
+#### Connection via [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
+`heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev`
+
+and perform any query in CLI
+
+`SELECT * FROM "two_line_element";`
+
+#### Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
+
+This information changes from time to time, please visit [Heroku Datastore Dashboard](https://data.heroku.com/datastores/22227e07-442e-41ff-8608-e94abc8e1bdf#administration) to see the lastest credential
 
 ```
 Driver: PostgreSQL
 
-Host: castor.db.elephantsql.com
+Host: ec2-52-73-155-171.compute-1.amazonaws.com
 
-User: omoglffn
+Database: d3cjqhogrcusg1
 
-Password: Ask for password
+User: kfjsvitgcfsmqq
 
-URL: jdbc:postgresql://castor.db.elephantsql.com/
+Port:5432
+
+Password: <PASSWORD>
+
+URI: jdbc:postgresql://ec2-52-73-155-171.compute-1.amazonaws.com:5432/d3cjqhogrcusg1
+
+Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server
 ```
 
-ElephantSQL DB connection secret is hidden in a `.env` file and stored locally
+Heroku Database connection secret is hidden in a `.env` file and stored locally
 
 Inside `/UCI-CubeSat-Server/.env`
 
-Paste this line: `DB_URL=postgresql://omoglffn:<PASSWORD_GOES_HERE>@castor.db.elephantsql.com/omoglffn`
+Ask in the discord channel for a copy of the `.env` file
 
 ## Deployment to Heroku
 
