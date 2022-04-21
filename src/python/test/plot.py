@@ -10,7 +10,6 @@ from src.python.service import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 
-# add new comment
 
 IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg"
 IRVINE = wgs84.latlon(33.643831, -117.841132, elevation_m=17)
@@ -29,7 +28,7 @@ def getAllSat():
     satellites = []
     response = tleService.loadTLE()
     for k in response.keys():
-        satellites.append(skyfieldService.getPath(response[k], "latlong", DURATION, RESOLUTION))
+        satellites.append(skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION))
     # for debug
     # print(len(satellites), satellites[0])
     return satellites
@@ -52,9 +51,9 @@ def plotPath() -> FuncAnimation:
     def init():
         setup()
         ax.set(xlabel='longitude', ylabel='latitude', title=data[0]["identifier"])
-        long = data[0]["longArray"]
+        lng = data[0]["lngArray"]
         lat = data[0]["latArray"]
-        currPath = ax.plot(long, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
@@ -63,9 +62,9 @@ def plotPath() -> FuncAnimation:
         # gc.collect()
         setup()
         ax.set(xlabel='longitude', ylabel='latitude', title=data[frame + 1]["identifier"])
-        long = data[frame + 1]["longArray"]
+        lng = data[frame + 1]["lngArray"]
         lat = data[frame + 1]["latArray"]
-        currPath = ax.plot(long, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
@@ -74,5 +73,9 @@ def plotPath() -> FuncAnimation:
 
 
 if __name__ == "__main__":
-    a = plotPath()
+    a = plotPath() # flight path of every available satellite
+
+    # for every available satellite, an animation of its flight path
+    # b = plotRealTimePath()
+
     pyplot.show()
