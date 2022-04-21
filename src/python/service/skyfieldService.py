@@ -1,3 +1,4 @@
+import collections
 import datetime
 import json
 import numpy
@@ -233,8 +234,7 @@ def findHorizonTime(
     #         print(", ", end="")
     # END DEBUG
 
-    retDict = {}
-    retJson = {}
+    response = collections.OrderedDict()
     for index in range(0, len(formattedEvents), 3):
         try:
             formattedTimeStamps[index + 2]
@@ -266,16 +266,27 @@ def findHorizonTime(
                     t0Sec,
                     t1Sec,
                     60))
-            eventTimeArray = eventDuration.utc_strftime('%Y %b %d %H:%M:%S')
+            skyfieldTimeFormat = "%Y %b %d %H:%M:%S"
+            eventTimeArray = eventDuration.utc_strftime(skyfieldTimeFormat)
 
-            retJson[str(datetime_peak)] = json.dumps({'rise': str(eventTimeArray[0]),
-                                                      'set': str(eventTimeArray[-1]),
-                                                      'duration': len(eventTimeArray),
-                                                      'interval': str(eventDuration)}, indent=4)
+            riseUtc = datetime.datetime.strptime(
+                eventTimeArray[0], skyfieldTimeFormat).replace(
+                tzinfo=datetime.timezone.utc)
+            setUtc = datetime.datetime.strptime(
+                eventTimeArray[-1], skyfieldTimeFormat).replace(tzinfo=datetime.timezone.utc)
+            peakUtc = datetime_peak
+            riseIso = riseUtc.isoformat(sep='T', timespec='auto')
+            setIso = setUtc.isoformat(sep='T', timespec='auto')
+            peakIso = peakUtc.isoformat(sep='T', timespec='auto')
+            eventInterval = [(datetime.datetime.strptime(e, skyfieldTimeFormat)
+                              .replace(tzinfo=datetime.timezone.utc))
+                             .isoformat(sep='T', timespec='auto')
+                             for e in eventTimeArray]
 
-            retDict[str(datetime_peak)] = {'rise': str(eventTimeArray[0]),
-                                           'set': str(eventTimeArray[-1]),
-                                           'duration': len(eventTimeArray),
-                                           'interval': str(eventDuration)}
+            response[peakIso] = dict(
+                rise=riseIso,
+                set=setIso,
+                duration=len(eventTimeArray),
+                interval=eventInterval)
 
-    return json.dumps(retJson, indent=4), retDict
+    return response
