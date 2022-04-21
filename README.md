@@ -1,16 +1,14 @@
 # UCI CubeSat Backend Flask Server
 
-Contributor:
+##Contributor:
 
 Hailey Lin: weixil4@uci.edu,
 
 Jiaen Zhang: jiaenz@uci.edu,
 
-Yi-Ju Tsai, Gabrielle Palar
+Yi-Ju Tsai, 
 
-Make sure you have `python3`, `pip3` installed
-
-The deployed Python server runs on `python-3.10.4`
+Gabrielle Palar
 
 ## Installing prerequisite
 
@@ -18,87 +16,103 @@ Double check `Python3` and `Pip3` are installed
 
 [Homebrew installation for macOS](https://brew.sh/)
 
-`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+    `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
-`brew install git`
+    `brew install git`
 
-`brew install postgresql`
+    `brew install postgresql`
 
-`brew install python@3.10`
+    `brew install python@3.10`
 
 [Chocolatey installation for Windows](https://chocolatey.org/install)
 
-`Run Powershell as Admin`
+    `Run Powershell as Admin`
 
-`Set-ExecutionPolicy AllSigned`
+    `Set-ExecutionPolicy AllSigned`
 
-`Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+    `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
 
-verify `chocolatey` is installed: `choco -?`
+    verify `chocolatey` is installed: `choco -?`
 
-`choco install git`
+    `choco install git`
 
-`choco install postgresql`
+    `choco install postgresql`
 
-`choco install python --version=3.10.2`
+    `choco install python --version=3.10.2`
 
 ## Setting up the Python/Flask Backend Server locally
 
-Setup `venv` virtualenv
+1. Setup virtual environment
 
-`cd UCI-CubeSat-Server`
+    `cd UCI-CubeSat-Server`
 
-`python3 -m venv venv`
+    `python3 -m venv venv`
 
-`. venv/bin/activate` for macOS/Linux or `\Scripts\activate` for Windows
 
-`pip install -r 'requirements.txt'`
+2. Activate venv: 
 
-`flask run`
+    macOS/Linux: `. venv/bin/activate`
 
-## Connecting to our SQL Database
+    Windows: `\Scripts\activate`
 
-`brew install postgresql` for macOS
 
-`choco install postgresql` for Windows
+3. Install postgreSQL:
 
-A free SQL database instance was created on [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
+   macOS/Linux: `brew install postgresql`
 
-#### Connection via [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+   Windows: `choco install postgresql`
 
-`heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev`
 
-and perform any query in CLI
+4. Install requirements.txt: `pip3 install -r 'requirements.txt'`
 
-`SELECT * FROM "two_line_element";`
 
-#### Connection Information using [DataGrip](https://www.jetbrains.com/datagrip/)
+5. Create `.env` file
+    
+    Create a new file under the UCI-CubeSat-Server root folder, named `.env`
 
-This information changes from time to time, please visit [Heroku Datastore Dashboard](https://data.heroku.com/datastores/22227e07-442e-41ff-8608-e94abc8e1bdf#administration) to see the lastest credential
+    Ask in the discord channel for a copy of the `.env` file.
 
-```
-Driver: PostgreSQL
 
-Host: ec2-52-73-155-171.compute-1.amazonaws.com
+6. Run Flask: `flask run`
 
-Database: d3cjqhogrcusg1
+    Reopen your IDE and retry if `flask run` does not work initially
 
-User: kfjsvitgcfsmqq
+## Connecting to SQL Database
 
-Port:5432
+1. Double check you have PostgreSQL installed: `pg_config --version`
 
-Password: <PASSWORD>
+    More information about our database information can be found on: [heroku-postgresql](https://devcenter.heroku.com/articles/heroku-postgresql)
 
-URI: jdbc:postgresql://ec2-52-73-155-171.compute-1.amazonaws.com:5432/d3cjqhogrcusg1
 
-Heroku CLI: heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server
-```
+2. Access Database:
+    
+    a. Command Line Interface([CLI](https://devcenter.heroku.com/articles/heroku-cli))
 
-Heroku Database connection secret is hidden in a `.env` file and stored locally
+       heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev
+       
+       SELETCT * FROM "two_line_element"; 
 
-Inside `/UCI-CubeSat-Server/.env`
+    b. DataGrip
 
-Ask in the discord channel for a copy of the `.env` file
+   [ElephantSQL INFO Dashboard](https://api.elephantsql.com/console/67aa07b9-8289-4754-a566-920acca61de2/details?)
+
+   1. Visit ElephantSQL Dashboard to access connection credential information 
+   
+   2. Open DataGrip 
+   
+   3. Open manage data sources using <kbd>command</kbd>+<kbd>;</kbd>
+   
+   4. Click on the add button on the top left corner, find PostgreSql, fill in the config based on ElephantSQL
+      1. DG[Host] = ElephantSQL[Server]
+      2. DG[User] = ElephantSQL[User & Default Database]
+      3. DG[Password] = ElephantSQL[password]
+      4. DG[Database] = ElephantSQL[User & Default Database]
+      5. DG[URL] = jdbc:postgresql://castor.db.elephantsql.com/omoglffn
+      6. Click on "Test Connection" 
+      7. If Succeed, click on apply and OK
+      
+   5. Now, you can write SQL query inside console using <kbd>shift</kbd> + <kbd>command</kbd> + <kbd>L</kbd>
+
 
 ## Deployment to Heroku
 
