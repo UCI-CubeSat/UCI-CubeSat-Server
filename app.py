@@ -117,11 +117,9 @@ def getHorizon():
     if satellite == "" or not (longitude and longitude):
         return flask.jsonify({})
 
-    predictedPass, predictedDict = skyfieldService.findHorizonTime(
+    return flask.jsonify(skyfieldService.findHorizonTime(
         tleService.loadTLE()[satellite], duration, wgs84.latlon(
-            latitude, longitude, elevation_m=elevation))
-
-    return predictedPass
+            latitude, longitude, elevation_m=elevation)))
 
 
 @app.route(f'{appConfig.apiBaseUrl}/emailSignup', methods=['POST'])
