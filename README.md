@@ -95,6 +95,8 @@ Double check `Python3` and `Pip3` are installed
     b. DataGrip
 
    [ElephantSQL INFO Dashboard](https://api.elephantsql.com/console/67aa07b9-8289-4754-a566-920acca61de2/details?)
+   
+   Elephant SQL is a software-as-a-service company that host PostgreSQL databases and handles the server configuration, backups and data connections on top of AWS. 
 
    1. Visit ElephantSQL Dashboard to access connection credential information 
    

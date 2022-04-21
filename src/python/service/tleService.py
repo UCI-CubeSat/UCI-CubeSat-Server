@@ -1,3 +1,10 @@
+"""
+Read/Write TLE data from:
+a. satnog API
+b. postgre Database
+c. memcache
+"""
+
 import ast
 import logging
 import subprocess
