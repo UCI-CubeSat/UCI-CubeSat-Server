@@ -9,16 +9,6 @@ availableSatelliteUrl = f"{baseUrl}/available_satellite"
 predictionUrl = f"{baseUrl}/prediction"
 
 
-def isRecent(timestamp: str) -> bool:
-    timestamp = datetime.strptime(
-        timestamp, '%Y-%m-%d %H:%M:%S.%f')
-    return (
-                   datetime.now() -
-                   timestamp).days == 0 and (
-                   datetime.now() -
-                   timestamp).seconds < 86400
-
-
 def testStatus():
     getStatus = requests.get(heartBeatUrl)
     assert getStatus.json()["status"] == "online"
@@ -39,17 +29,30 @@ def testAvailableSatellite():
 
 
 def testPrediction():
+    def isValidIso(datimeString):
+        try:
+            datetime.fromisoformat(datimeString)
+        except Exception:
+            return False
+        return True
+
     getAvailableSatellite = requests.get(availableSatelliteUrl)
     testKey: list = getAvailableSatellite.json()
     t = time.perf_counter()
     successCount = 0
     failCount = 0
     for key in testKey:
+        testPredictionUrl = f"{predictionUrl}?" \
+                            f"satellite={key}&latitude=33.6405&longitude=-117.8443&duration={3600.0 * 1.0 * 24.0}"
         try:
-            testPredictionUrl = f"{predictionUrl}?" \
-                f"satellite={key}&latitude=33.6405&longitude=-117.8443&duration={3600.0*1.0*24.0}"
-            if requests.get(testPredictionUrl).json() != dict():
-                successCount += 1
+            response: dict = requests.get(testPredictionUrl).json()
+            if response == dict():
+                continue
+            successCount += 1
+            for peak in response.keys():
+                assert isValidIso(peak) and isValidIso(
+                    response[peak]["rise"]) and isValidIso(
+                    response[peak]["set"])
         except Exception:
             failCount += 1
 
