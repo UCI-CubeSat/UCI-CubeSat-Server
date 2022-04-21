@@ -116,6 +116,17 @@ Double check `Python3` and `Pip3` are installed
    5. Now, you can write SQL query inside console using <kbd>shift</kbd> + <kbd>command</kbd> + <kbd>L</kbd>
 
 
+## Run FullStack Web App
+1. cd to UCI-CubeSat-Server:
+
+   create [venv environment](https://github.com/UCI-CubeSat/UCI-CubeSat-Server#setting-up-the-pythonflask-backend-server-locally)
+
+   `flask run`
+2. cd to UCI-CubeSat-Dashboard:
+
+   `npm start`
+
+
 ## Deployment to Heroku
 
 Deploying to Heroku require significant configuration
