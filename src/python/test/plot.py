@@ -10,7 +10,6 @@ from src.python.service import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 
-
 IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg"
 IRVINE = wgs84.latlon(33.643831, -117.841132, elevation_m=17)
 DURATION = 2.0 * 3600
@@ -25,13 +24,8 @@ def getColor():
 
 
 def getAllSat():
-    satellites = []
     response = tleService.loadTLE()
-    for k in response.keys():
-        satellites.append(skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION))
-    # for debug
-    # print(len(satellites), satellites[0])
-    return satellites
+    return [skyfieldService.getPath(response[key], "latLng", DURATION, RESOLUTION) for key in response.keys()]
 
 
 def plotPath() -> FuncAnimation:
@@ -73,9 +67,10 @@ def plotPath() -> FuncAnimation:
 
 
 if __name__ == "__main__":
-    a = plotPath() # flight path of every available satellite
+    # flight path of every available satellite
+    _ = plotPath()
 
     # for every available satellite, an animation of its flight path
-    # b = plotRealTimePath()
+    # _ = plotRealTimePath()
 
     pyplot.show()

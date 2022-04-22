@@ -1,11 +1,8 @@
 import requests
-import time
 from datetime import datetime
-import aiohttp
-import asyncio
 from urllib.parse import quote
 
-from ..util.asyncUtil import asyncRequest, asyncRequestAll
+from ..util.asyncUtil import asyncRequest, asyncRequestAll, aiohttp, asyncio
 
 baseUrl = "https://uci-cubesat-server-dev.herokuapp.com/api/v1"
 tleUrl = f"{baseUrl}/tle"
