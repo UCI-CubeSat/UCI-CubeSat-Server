@@ -53,7 +53,7 @@ Double check `Python3` and `Pip3` are installed
 
     macOS/Linux: `. venv/bin/activate`
 
-    Windows: `\Scripts\activate`
+    Windows: `venv\Scripts\activate`
 
 
 3. Install postgreSQL:
