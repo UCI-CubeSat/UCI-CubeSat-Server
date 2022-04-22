@@ -12,7 +12,7 @@ from datetime import datetime
 
 from pymemcache.client import base
 
-from src.python.database import dbUtils, dbModel
+from src.python.database import dbUtils
 from src.python.config import appConfig
 from src.python.service import satnogsService
 
@@ -113,31 +113,30 @@ def writeDB(data):
         return
 
     data: list = [
-        dbModel.TwoLineElement.insertRow(
+        (
             key,
             data[key]['tle1'],
             data[key]['tle2'],
             datetime.now()) for key in data.keys()]
     dbUtils.dbInsertAll("two_line_element", data)
-    dbUtils.dbCloseConnection()
 
 
 def readDB():
     if not appConfig.enableDB:
         return saveTLE()
 
-    if not dbUtils.dbFetchAll("get_tle_timestamp"):
+    timestamp, = dbUtils.dbFetch("getTimestamp")
+
+    if not timestamp:
         return saveTLE()
 
-    timestamp, = dbUtils.dbFetchAll("get_tle_timestamp")
     if not isRecent(timestamp):
         logging.warning("WARNING: db outdated")
         return saveTLE()
 
-    dbData: dict = dbUtils.dbFetchAll("find_tle_all", dict=True)
+    dbData: dict = dbUtils.dbFetchAll("getTwoLineElementAll", dict=True)
     data: dict = dict(zip([tle['tle0']
                       for tle in dbData], [dict(kv) for kv in dbData]))
-    dbUtils.dbCloseConnection()
 
     if data:
         writeMemcache(data)
@@ -170,7 +169,7 @@ def loadTLE() -> {dict}:
 if __name__ == "__main__":
     # clear cache && db
     clearMemcache()
-    dbUtils.dbTruncateTable("two_line_element")
+    # dbUtils.truncateTable("two_line_element")
     # change setting
     appConfig.enableDB = True
     appConfig.enableMemcache = False

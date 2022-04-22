@@ -1,4 +1,8 @@
-from src.python.config.appConfig import db
+from src.python.config.appConfig import app
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy(app)
 
 
 class TwoLineElement(db.Model):
@@ -10,3 +14,6 @@ class TwoLineElement(db.Model):
     @staticmethod
     def insertRow(tle0, tle1, tle2, updated):
         return TwoLineElement(tle0=tle0, tle1=tle1, tle2=tle2, updated=updated)
+
+
+db.close_all_sessions()
