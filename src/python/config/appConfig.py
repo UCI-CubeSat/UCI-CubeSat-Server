@@ -2,11 +2,10 @@ import urllib
 import os
 from sys import platform as _platform
 from dotenv import load_dotenv
-import psycopg2
-from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_cors import CORS
 from flask_talisman import Talisman
+import psycopg
 # import logging
 
 # logging config setting
@@ -25,36 +24,25 @@ Talisman(app, content_security_policy=None)
 
 # load secret from .env
 load_dotenv()
+
 # Heroku Postgre
-# dbUrl = os.getenv("DATABASE_URL")
-# dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
+dbUrl = os.getenv("DATABASE_URL")
+dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
+
 # Elephant Postgre
-dbUrl = os.getenv("DB_URL")
-bingMapApiKey = os.getenv('BING_MAP_API_KEY')
-satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')
+# dbUrl = os.getenv("DB_URL")
 
 # sqlalchemy db config setting
-# f"postgresql{s[8:]}"
 app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
 
 # psycopg2 db config setting
+_ = psycopg
 urllib.parse.uses_netloc.append("postgres")
 url = urllib.parse.urlparse(dbUrl)
-dbCredential = dict(database=url.path[1:],
-                    user=url.username,
-                    password=url.password,
-                    host=url.hostname,
-                    port=url.port,
-                    options='-c statement_timeout=10000')
-dbConnection = psycopg2.connect(database=url.path[1:],
-                                user=url.username,
-                                password=url.password,
-                                host=url.hostname,
-                                port=url.port,
-                                options='-c statement_timeout=10000')
+dbCredential = dbUrl
 
 # API URL config
+satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')
 apiVersion = "v1"
 apiBaseUrl = f"/api/{apiVersion}"
