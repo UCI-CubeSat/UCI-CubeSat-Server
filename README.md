@@ -53,7 +53,7 @@ Double check `Python3` and `Pip3` are installed
 
     macOS/Linux: `. venv/bin/activate`
 
-    Windows: `\Scripts\activate`
+    Windows: `venv\Scripts\activate`
 
 
 3. Install postgreSQL:
@@ -113,7 +113,7 @@ Double check `Python3` and `Pip3` are installed
       6. Click on "Test Connection" 
       7. If Succeed, click on apply and OK
       
-   5. Now, you can write SQL query inside console using <kbd>shift</kbd> + <kbd>command</kbd> + <kbd>L</kbd>
+   5. Now, you can write SQL query inside console. To open the console, use <kbd>shift</kbd> + <kbd>command</kbd> + <kbd>L</kbd> 
 
 
 ## Run FullStack Web App

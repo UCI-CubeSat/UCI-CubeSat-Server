@@ -6,7 +6,8 @@ import psycopg2
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_cors import CORS
-import logging
+from flask_talisman import Talisman
+# import logging
 
 # logging config setting
 # logLevel = logging.ERROR
@@ -20,6 +21,7 @@ enableMemcache = _platform == "darwin" and False  # always False on non-macOS
 # flask config setting
 app = Flask(__name__)
 CORS(app)
+Talisman(app, content_security_policy=None)
 
 # load secret from .env
 load_dotenv()
@@ -40,12 +42,18 @@ db = SQLAlchemy(app)
 # psycopg2 db config setting
 urllib.parse.uses_netloc.append("postgres")
 url = urllib.parse.urlparse(dbUrl)
+dbCredential = dict(database=url.path[1:],
+                    user=url.username,
+                    password=url.password,
+                    host=url.hostname,
+                    port=url.port,
+                    options='-c statement_timeout=10000')
 dbConnection = psycopg2.connect(database=url.path[1:],
                                 user=url.username,
                                 password=url.password,
                                 host=url.hostname,
                                 port=url.port,
-                                options='-c statement_timeout=60000')
+                                options='-c statement_timeout=10000')
 
 # API URL config
 apiVersion = "v1"
