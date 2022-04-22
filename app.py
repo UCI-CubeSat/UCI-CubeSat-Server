@@ -16,11 +16,11 @@ def getHomePage():
         "Name": "UCI CubeSat Flask Server",
         "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
         "Endpoint": {"GET": [
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/heartbeat",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/tle",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/states",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/prediction",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/available_satellite",
+            f"{flask.request.host_url}api/v1/heartbeat",
+            f"{flask.request.host_url}api/v1/tle",
+            f"{flask.request.host_url}api/v1/states",
+            f"{flask.request.host_url}api/v1/prediction",
+            f"{flask.request.host_url}api/v1/available_satellite",
         ]}
     })
 
@@ -42,7 +42,8 @@ def getServerStatus():
             }
         })
     except Exception as error:
-        response = flask.jsonify({"status": str(f"{str(type(error))}: {error}")})
+        response = flask.jsonify(
+            {"status": str(f"{str(type(error))}: {error}")})
 
     return response
 
