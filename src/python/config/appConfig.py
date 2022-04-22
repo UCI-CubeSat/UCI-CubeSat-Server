@@ -36,11 +36,17 @@ dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
 app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# psycopg2 db config setting
+# psycopg db config setting
 _ = psycopg
 urllib.parse.uses_netloc.append("postgres")
 url = urllib.parse.urlparse(dbUrl)
 dbCredential = dbUrl
+psycopg2Config = dict(database=url.path[1:],
+                      user=url.username,
+                      password=url.password,
+                      host=url.hostname,
+                      port=url.port,
+                      options='-c statement_timeout=10000')
 
 # API URL config
 satnogsApiKey = os.getenv('SATNOGS_MAP_API_KEY')

@@ -39,10 +39,10 @@ def isRecent(timestamp: datetime) -> bool:
         lastTimestamp = timestamp
     currentTimestamp: datetime = datetime.now()
     return (
-        currentTimestamp -
-        lastTimestamp).days == 0 and (
-        currentTimestamp -
-        lastTimestamp).seconds < 86400
+                   currentTimestamp -
+                   lastTimestamp).days == 0 and (
+                   currentTimestamp -
+                   lastTimestamp).seconds < 86400
 
 
 def clearMemcache():
@@ -112,20 +112,24 @@ def writeDB(data):
     if not appConfig.enableDB:
         return
 
+    # psycopg.mogrify implementation
+    # value = ",".join([f"(\'{key}\',\'{data[key]['tle1']}\',\'{data[key]['tle2']}\',\'{datetime.now()}\'::timestamp)"
+    #                   for key in data.keys() if not "\'" in key])
+
     data: list = [
         (
             key,
             data[key]['tle1'],
             data[key]['tle2'],
             datetime.now()) for key in data.keys()]
-    dbUtils.dbInsertAll("two_line_element", data)
+    dbUtils.insertAll("two_line_element", data)
 
 
 def readDB():
     if not appConfig.enableDB:
         return saveTLE()
 
-    timestamp, = dbUtils.dbFetch("getTimestamp")
+    timestamp, = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
         return saveTLE()
@@ -134,9 +138,9 @@ def readDB():
         logging.warning("WARNING: db outdated")
         return saveTLE()
 
-    dbData: dict = dbUtils.dbFetchAll("getTwoLineElementAll", dict=True)
+    dbData: dict = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
     data: dict = dict(zip([tle['tle0']
-                      for tle in dbData], [dict(kv) for kv in dbData]))
+                           for tle in dbData], [dict(kv) for kv in dbData]))
 
     if data:
         writeMemcache(data)
