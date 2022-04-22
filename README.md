@@ -90,7 +90,7 @@ Double check `Python3` and `Pip3` are installed
 
        heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev
        
-       SELETCT * FROM "two_line_element"; 
+       SELECT * FROM "two_line_element"; 
 
     Method b. DataGrip
 
