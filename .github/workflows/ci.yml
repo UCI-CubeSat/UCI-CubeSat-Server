@@ -22,9 +22,7 @@ jobs:
       - name: Run test with pytest
         run: |
           cd src/python/test
-          pip install pytest
-          pip install requests
-          pip install datetime
+          pip install -r "requirements.txt"
           pytest test_endpoint.py
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
