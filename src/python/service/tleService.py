@@ -20,7 +20,7 @@ from src.python.service import satnogsService
 client = base.Client(('localhost', 11211))
 
 
-def getTLE() -> {dict}:
+def getTwoLineElement() -> {dict}:
     tleList = satnogsService.tleFilter(
         satnogsService.sortMostRecent(
             satnogsService.getSatellite()))
@@ -108,7 +108,7 @@ def readMemcache():
     return data
 
 
-def writeDB(data):
+def writeDatabase(data):
     if not appConfig.enableDB:
         return
 
@@ -125,18 +125,18 @@ def writeDB(data):
     dbUtils.insertAll("two_line_element", data)
 
 
-def readDB():
+def readDatabase():
     if not appConfig.enableDB:
-        return saveTLE()
+        return saveTwoLineElement()
 
     timestamp, = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
-        return saveTLE()
+        return saveTwoLineElement()
 
     if not isRecent(timestamp):
         logging.warning("WARNING: db outdated")
-        return saveTLE()
+        return saveTwoLineElement()
 
     dbData: dict = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
     data: dict = dict(zip([tle['tle0']
@@ -146,11 +146,11 @@ def readDB():
         writeMemcache(data)
         return data
 
-    return saveTLE()
+    return saveTwoLineElement()
 
 
-def saveTLE() -> {dict}:
-    data = getTLE()
+def saveTwoLineElement() -> {dict}:
+    data = getTwoLineElement()
 
     if appConfig.enableMemcache:
         logging.info("LOGGING: writing to cache")
@@ -159,15 +159,22 @@ def saveTLE() -> {dict}:
 
     if appConfig.enableDB:
         logging.info("LOGGING: writing to db")
-        writeDB(data)
+        writeDatabase(data)
         logging.info("LOGGING: done writing to db")
 
     return data
 
 
-def loadTLE() -> {dict}:
+def loadTwoLineElement() -> {dict}:
     data = readMemcache()
-    return data if data else readDB()
+    return data if data else readDatabase()
+
+
+def refreshTwoLineElement() -> {dict}:
+    clearMemcache()
+    dbUtils.truncateTable("two_line_element")
+
+    return loadTwoLineElement()
 
 
 if __name__ == "__main__":
@@ -179,4 +186,4 @@ if __name__ == "__main__":
     appConfig.enableMemcache = False
     # test db clear/read/write
     for _ in range(10):
-        print(loadTLE())
+        print(loadTwoLineElement())

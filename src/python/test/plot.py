@@ -26,7 +26,7 @@ def getColor():
 
 def getAllSat():
     satellites = []
-    response = tleService.loadTLE()
+    response = tleService.loadTwoLineElement()
     for k in response.keys():
         satellites.append(
             skyfieldService.getPath(
@@ -106,7 +106,6 @@ def plotRealTime():
 
     # create the first plot
     point, = ax.plot([x[0]], [y[0]], 'ro')
-    line, = ax.plot(x, y, 'black', label='ground track')
     ax.legend()
     ax.set_xlim([-180, 180])
     ax.set_ylim([-90, 90])
