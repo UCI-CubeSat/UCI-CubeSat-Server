@@ -171,8 +171,10 @@ def loadTwoLineElement() -> {dict}:
 
 
 def refreshTwoLineElement() -> {dict}:
-    clearMemcache()
-    dbUtils.truncateTable("two_line_element")
+    if appConfig.enableMemcache:
+        clearMemcache()
+    if appConfig.enableDB:
+        dbUtils.truncateTable("two_line_element")
 
     return loadTwoLineElement()
 
