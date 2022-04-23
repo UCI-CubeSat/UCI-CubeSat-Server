@@ -53,7 +53,7 @@ Double check `Python3` and `Pip3` are installed
 
     macOS/Linux: `. venv/bin/activate`
 
-    Windows: `\Scripts\activate`
+    Windows: `. venv\Scripts\activate`
 
 
 3. Install postgreSQL:
@@ -86,13 +86,13 @@ Double check `Python3` and `Pip3` are installed
 
 2. Access Database:
     
-    a. Command Line Interface([CLI](https://devcenter.heroku.com/articles/heroku-cli))
+    Method a. Command Line Interface([CLI](https://devcenter.heroku.com/articles/heroku-cli))
 
        heroku pg:psql postgresql-solid-33882 --app uci-cubesat-server-dev
        
-       SELETCT * FROM "two_line_element"; 
+       SELECT * FROM "two_line_element"; 
 
-    b. DataGrip
+    Method b. DataGrip
 
    [ElephantSQL INFO Dashboard](https://api.elephantsql.com/console/67aa07b9-8289-4754-a566-920acca61de2/details?)
    
