@@ -1,55 +1,81 @@
 import psycopg2
-import psycopg2.extras
+import psycopg
+from psycopg.rows import dict_row
 
-from src.python.database import dbModel, dbQueries
-from src.python.config import appConfig
-
-
-def dbInsertAll(tableName, entryArray: list):
-    dbTruncateTable(tableName)
-
-    for entry in entryArray:
-        dbModel.db.session.add(entry)
-    dbModel.db.session.commit()
+from src.python.database import dbQueries
+from src.python.config.appConfig import dbCredential, psycopg2Config
 
 
-def dbFetchAll(queryName, *args, **kwargs):
-    """
-    :param queryName: list of query inside dbQueries.py
-    :param args: pass parameter into SQL query
-    :param kwargs: return a dict-like object if dict=true, else return a list of tuple
-    :return:
-    """
+connectionConfig = dict(conninfo=dbCredential, autocommit=True)
+connectionConfigRowFactory = dict(
+    conninfo=dbCredential,
+    autocommit=True,
+    row_factory=dict_row)
+
+
+def insertAll(tableName, entryArray: list):
+    truncateTable(tableName)
+
+    with psycopg2.connect(**psycopg2Config) as dbConnection:
+        try:
+            with dbConnection.cursor() as dbCursor:
+                value = ','.join(
+                    dbCursor.mogrify(
+                        "(%s,%s,%s,%s)",
+                        entry).decode("utf-8") for entry in entryArray)
+                query = f"INSERT INTO {tableName} VALUES {value}"
+                dbCursor.execute(query)
+        except psycopg.errors.Error:
+            dbConnection.close()
+
+
+def fetch(queryName, *args):
+    with psycopg.connect(**connectionConfig) as dbConnection:
+        try:
+            with dbConnection.cursor() as dbCursor:
+                if args:
+                    dbCursor.execute(dbQueries.queries[queryName](args))
+                else:
+                    dbCursor.execute(dbQueries.queries[queryName]())
+                return dbCursor.fetchone()
+        except psycopg.errors.Error:
+            dbConnection.close()
+
+
+def fetchAll(queryName, *args, **kwargs):
     if 'dict' in kwargs.keys() and kwargs['dict']:
-        dbCursor = appConfig.dbConnection.cursor(
-            cursor_factory=psycopg2.extras.RealDictCursor)
+        config = connectionConfigRowFactory
     else:
-        dbCursor = appConfig.dbConnection.cursor()
+        config = connectionConfig
+    with psycopg.connect(**config) as dbConnection:
+        try:
+            with dbConnection.cursor() as dbCursor:
+                if args:
+                    dbCursor.execute(dbQueries.queries[queryName](args))
+                else:
+                    dbCursor.execute(dbQueries.queries[queryName]())
 
-    try:
-        if args:
-            dbCursor.execute(dbQueries.queries[queryName](args))
-        else:
-            dbCursor.execute(dbQueries.queries[queryName]())
-    except psycopg2.errors.UndefinedTable:
-        return None
+                dbResponse: [()] = dbCursor.fetchall()
+                return None if len(dbResponse) == 0 else dbResponse[0] if len(
+                    dbResponse) == 1 else dbResponse
 
-    dbResponse: [()] = dbCursor.fetchall()
-    return None if len(dbResponse) == 0 else dbResponse[0] if len(
-        dbResponse) == 1 else dbResponse
-
-
-def dbDropTable(tableName):
-    dbCursor = appConfig.dbConnection.cursor()
-    dbCursor.execute(dbQueries.queries["drop_table_by_name"](tableName))
-    appConfig.dbConnection.commit()
+        except psycopg.errors.Error:
+            dbConnection.close()
 
 
-def dbTruncateTable(tableName):
-    dbCursor = appConfig.dbConnection.cursor()
-    dbCursor.execute(dbQueries.queries["truncate_table_by_name"](tableName))
-    appConfig.dbConnection.commit()
+def dropTable(tableName):
+    with psycopg.connect(**connectionConfig) as dbConnection:
+        try:
+            with dbConnection.cursor() as dbCursor:
+                dbCursor.execute(dbQueries.queries["dropTable"](tableName))
+        except psycopg.errors.Error:
+            dbConnection.close()
 
 
-def dbCloseConnection():
-    dbModel.db.close_all_sessions()
+def truncateTable(tableName):
+    with psycopg.connect(**connectionConfig) as dbConnection:
+        try:
+            with dbConnection.cursor() as dbCursor:
+                dbCursor.execute(dbQueries.queries["truncateTable"](tableName))
+        except psycopg.errors.Error:
+            dbConnection.close()

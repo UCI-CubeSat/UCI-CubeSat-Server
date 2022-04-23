@@ -1,6 +1,6 @@
-'''
+"""
 For previous web app version, when users need to type address manually
-'''
+"""
 
 import urllib
 import requests

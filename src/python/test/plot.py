@@ -11,7 +11,6 @@ from src.python.service import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 
-
 IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg"
 IRVINE = wgs84.latlon(33.643831, -117.841132, elevation_m=17)
 DURATION = 2.0 * 3600
@@ -27,11 +26,14 @@ def getColor():
 
 def getAllSat():
     satellites = []
-    response = tleService.loadTLE()
+    response = tleService.loadTwoLineElement()
     for k in response.keys():
-        satellites.append(skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION))
-    # for debug
-    # print(len(satellites), satellites[0])
+        satellites.append(
+            skyfieldService.getPath(
+                response[k],
+                "latLng",
+                DURATION,
+                RESOLUTION))
     return satellites
 
 
@@ -44,17 +46,29 @@ def plotPath() -> FuncAnimation:
         ax.set_xlim([-180, 180])
         ax.set_ylim([-90, 90])
         ax.imshow(img, origin='upper', extent=[-180, 180, -90, 90], alpha=0.75)
-        ax.annotate(f'. {"Irvine, CA"}', (-117.841132, 33.643831), color='black')
+        ax.annotate(
+            f'. {"Irvine, CA"}',
+            (-117.841132,
+             33.643831),
+            color='black')
         ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
         ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
         ax.set(xlabel='longitude', ylabel='latitude', title='NAME')
 
     def init():
         setup()
-        ax.set(xlabel='longitude', ylabel='latitude', title=data[0]["identifier"])
+        ax.set(
+            xlabel='longitude',
+            ylabel='latitude',
+            title=data[0]["identifier"])
         lng = data[0]["lngArray"]
         lat = data[0]["latArray"]
-        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(
+            lng,
+            lat,
+            'black',
+            label='ground track',
+            linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
@@ -62,15 +76,22 @@ def plotPath() -> FuncAnimation:
         ax.cla()
         # gc.collect()
         setup()
-        ax.set(xlabel='longitude', ylabel='latitude', title=data[frame + 1]["identifier"])
+        ax.set(xlabel='longitude', ylabel='latitude',
+               title=data[frame + 1]["identifier"])
         lng = data[frame + 1]["lngArray"]
         lat = data[frame + 1]["latArray"]
-        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(
+            lng,
+            lat,
+            'black',
+            label='ground track',
+            linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
     return animation.FuncAnimation(fig, update, frames=len(data) - 1,
                                    init_func=init, interval=1000)
+
 
 def plotRealTime():
     satelliteToPlot = getAllSat()[0]
@@ -80,12 +101,11 @@ def plotRealTime():
     ax = fig.add_subplot()
     img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format='jpg')
 
-    x=satelliteToPlot["lngArray"]
-    y=satelliteToPlot["latArray"]
+    x = satelliteToPlot["lngArray"]
+    y = satelliteToPlot["latArray"]
 
     # create the first plot
     point, = ax.plot([x[0]], [y[0]], 'ro')
-    line, = ax.plot(x, y, 'black', label='ground track')
     ax.legend()
     ax.set_xlim([-180, 180])
     ax.set_ylim([-90, 90])
@@ -94,22 +114,22 @@ def plotRealTime():
     # ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
     ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
     ax.annotate(f'. {"Sydney, AUS"}', (151.2093, -33.8688), color='black')
-    ax.set(xlabel='longitude', ylabel='latitude', title=satelliteToPlot["identifier"])
+    ax.set(xlabel='longitude', ylabel='latitude',
+           title=satelliteToPlot["identifier"])
 
     # move the point position at every frame
     def update_point(n, x, y, point):
         point.set_data(np.array([x[n], y[n]]))
         return point
 
-    ani=animation.FuncAnimation(fig, update_point, 99, fargs=(x, y, point))
-
-    pyplot.show()
+    return animation.FuncAnimation(fig, update_point, 99, fargs=(x, y, point))
 
 
 if __name__ == "__main__":
-    a = plotPath() # flight path of every available satellite
+    # flight path of every available satellite
+    _ = plotPath()
 
     # for every available satellite, an animation of its flight path
-    b = plotRealTime()
+    _ = plotRealTime()
 
     pyplot.show()

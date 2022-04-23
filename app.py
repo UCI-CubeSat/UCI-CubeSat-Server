@@ -16,11 +16,11 @@ def getHomePage():
         "Name": "UCI CubeSat Flask Server",
         "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
         "Endpoint": {"GET": [
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/heartbeat",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/tle",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/states",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/prediction",
-            "https://uci-cubesat-server-dev.herokuapp.com/api/v1/available_satellite",
+            f"{flask.request.host_url}api/v1/heartbeat",
+            f"{flask.request.host_url}api/v1/tle",
+            f"{flask.request.host_url}api/v1/states",
+            f"{flask.request.host_url}api/v1/prediction",
+            f"{flask.request.host_url}api/v1/available_satellite",
         ]}
     })
 
@@ -28,7 +28,7 @@ def getHomePage():
 @app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
 def getServerStatus():
     satnogsRequest = requests.get(satnogsService.TLE_URL)
-    dbRequest: dict = tleService.loadTLE()
+    dbRequest: dict = tleService.loadTwoLineElement()
     try:
         response = flask.jsonify({
             "status": "online",
@@ -42,14 +42,17 @@ def getServerStatus():
             }
         })
     except Exception as error:
-        response = flask.jsonify({"status": str(f"{str(type(error))}: {error}")})
+        response = flask.jsonify(
+            {"status": str(f"{str(type(error))}: {error}")})
 
     return response
 
 
 @app.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
-def getPayload():
-    return flask.jsonify(tleService.loadTLE())
+def getTwoLineElement():
+    refresh = request.args.get("refresh", default="false", type=str)
+    return flask.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
+        else flask.jsonify(tleService.loadTwoLineElement())
 
 
 @app.route(f'{appConfig.apiBaseUrl}/geocoding', methods=['POST'])
@@ -71,14 +74,14 @@ def getLatLong():
 
 @app.route(f'{appConfig.apiBaseUrl}/available_satellite', methods=['GET'])
 def getAvailableSatellite():
-    return flask.jsonify(list(tleService.loadTLE().keys()))
+    return flask.jsonify(list(tleService.loadTwoLineElement().keys()))
 
 
 @app.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
 def getSatelliteState():
     name = request.args.get("name", default="AmicalSat", type=str).upper()
     duration = request.args.get("duration", default=3600.0, type=float)
-    data = tleService.loadTLE()
+    data = tleService.loadTwoLineElement()
 
     try:
         satellite_tle = data[name] if name in data.keys(
@@ -118,7 +121,7 @@ def getHorizon():
         return flask.jsonify({})
 
     return flask.jsonify(skyfieldService.findHorizonTime(
-        tleService.loadTLE()[satellite], duration, wgs84.latlon(
+        tleService.loadTwoLineElement()[satellite], duration, wgs84.latlon(
             latitude, longitude, elevation_m=elevation)))
 
 
@@ -128,17 +131,17 @@ def addEmailSubscriber():
     pass
 
 
-@app.route(f'{appConfig.apiBaseUrl}/performance', methods=['GET'])
-def performanceMetric():
+@app.route(f'{appConfig.apiBaseUrl}/serverMetric', methods=['GET'])
+def serverMetric():
     duration = request.args.get("duration", default=3600.0 * 24, type=float)
 
     t = time.perf_counter()
-    kvSet = tleService.loadTLE()
+    kvSet = tleService.loadTwoLineElement()
     initialLoadTime = time.perf_counter() - t
     keySet: list = kvSet.keys()
     t = time.perf_counter()
     for satellite in keySet:
-        _, _ = skyfieldService.findHorizonTime(
+        _ = skyfieldService.findHorizonTime(
             kvSet[satellite], duration, wgs84.latlon(
                 33.6405, -117.8443, elevation_m=0))
 
@@ -146,9 +149,9 @@ def performanceMetric():
 
     return flask.jsonify({
         "Initial Load Cost:": initialLoadTime,
-        "Calculation Cost:": calculationTime,
-        "Calculation Size:": {
-            "Duration": f"{duration // 3600} hours",
+        "Prediction Calculation Cost:": calculationTime,
+        "Prediction Calculation Size:": {
+            "Duration": duration // 3600,
             "Number of Satellite:": len(keySet)
         }
     })

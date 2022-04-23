@@ -12,13 +12,6 @@ from skyfield.api import EarthSatellite, load
 from skyfield.timelib import Time
 
 
-def selectSat(tle: dict, name: str) -> dict:
-    if name not in tle.keys():
-        return {}
-
-    return tle[name]
-
-
 def getPath(
         data: dict,
         mode: str = "latLng",

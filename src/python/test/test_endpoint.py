@@ -1,17 +1,18 @@
 import requests
-import time
 from datetime import datetime
-import aiohttp
-import asyncio
 from urllib.parse import quote
 
-from ..util.asyncUtil import asyncRequest, asyncRequestAll
+from ..util.asyncUtil import asyncRequest, asyncRequestAll, aiohttp, asyncio
 
+# baseUrl for production
 baseUrl = "https://uci-cubesat-server-dev.herokuapp.com/api/v1"
+# baseUrl if you are running pytest locally
+# baseUrl = "http://127.0.0.1:5000/api/v1"
 tleUrl = f"{baseUrl}/tle"
 heartBeatUrl = f"{baseUrl}/heartbeat"
 availableSatelliteUrl = f"{baseUrl}/available_satellite"
 predictionUrl = f"{baseUrl}/prediction"
+calculationUrl = f"{baseUrl}/serverMetric"
 
 
 def isValidIso(datetimeString):
@@ -36,6 +37,15 @@ def testStatus():
 def testTle():
     getTle = requests.get(tleUrl)
     assert getTle.status_code == 200
+    getTle = requests.get(f"{tleUrl}?refresh=true")
+    assert getTle.status_code == 200
+    getTle = requests.get(tleUrl)
+    assert getTle.status_code == 200
+
+
+def testCalculation():
+    runCalculation = requests.get(calculationUrl)
+    assert runCalculation.status_code == 200
 
 
 def testAvailableSatellite():

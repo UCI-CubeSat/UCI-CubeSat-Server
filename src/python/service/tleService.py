@@ -12,7 +12,7 @@ from datetime import datetime
 
 from pymemcache.client import base
 
-from src.python.database import dbUtils, dbModel
+from src.python.database import dbUtils
 from src.python.config import appConfig
 from src.python.service import satnogsService
 
@@ -20,7 +20,7 @@ from src.python.service import satnogsService
 client = base.Client(('localhost', 11211))
 
 
-def getTLE() -> {dict}:
+def getTwoLineElement() -> {dict}:
     tleList = satnogsService.tleFilter(
         satnogsService.sortMostRecent(
             satnogsService.getSatellite()))
@@ -108,46 +108,49 @@ def readMemcache():
     return data
 
 
-def writeDB(data):
+def writeDatabase(data):
     if not appConfig.enableDB:
         return
 
+    # psycopg.mogrify implementation
+    # value = ",".join([f"(\'{key}\',\'{data[key]['tle1']}\',\'{data[key]['tle2']}\',\'{datetime.now()}\'::timestamp)"
+    #                   for key in data.keys() if not "\'" in key])
+
     data: list = [
-        dbModel.TwoLineElement.insertRow(
+        (
             key,
             data[key]['tle1'],
             data[key]['tle2'],
             datetime.now()) for key in data.keys()]
-    dbUtils.dbInsertAll("two_line_element", data)
-    dbUtils.dbCloseConnection()
+    dbUtils.insertAll("two_line_element", data)
 
 
-def readDB():
+def readDatabase():
     if not appConfig.enableDB:
-        return saveTLE()
+        return saveTwoLineElement()
 
-    if not dbUtils.dbFetchAll("get_tle_timestamp"):
-        return saveTLE()
+    timestamp, = dbUtils.fetch("getTimestamp")
 
-    timestamp, = dbUtils.dbFetchAll("get_tle_timestamp")
+    if not timestamp:
+        return saveTwoLineElement()
+
     if not isRecent(timestamp):
         logging.warning("WARNING: db outdated")
-        return saveTLE()
+        return saveTwoLineElement()
 
-    dbData: dict = dbUtils.dbFetchAll("find_tle_all", dict=True)
+    dbData: dict = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
     data: dict = dict(zip([tle['tle0']
-                      for tle in dbData], [dict(kv) for kv in dbData]))
-    dbUtils.dbCloseConnection()
+                           for tle in dbData], [dict(kv) for kv in dbData]))
 
     if data:
         writeMemcache(data)
         return data
 
-    return saveTLE()
+    return saveTwoLineElement()
 
 
-def saveTLE() -> {dict}:
-    data = getTLE()
+def saveTwoLineElement() -> {dict}:
+    data = getTwoLineElement()
 
     if appConfig.enableMemcache:
         logging.info("LOGGING: writing to cache")
@@ -156,24 +159,33 @@ def saveTLE() -> {dict}:
 
     if appConfig.enableDB:
         logging.info("LOGGING: writing to db")
-        writeDB(data)
+        writeDatabase(data)
         logging.info("LOGGING: done writing to db")
 
     return data
 
 
-def loadTLE() -> {dict}:
+def loadTwoLineElement() -> {dict}:
     data = readMemcache()
-    return data if data else readDB()
+    return data if data else readDatabase()
+
+
+def refreshTwoLineElement() -> {dict}:
+    if appConfig.enableMemcache:
+        clearMemcache()
+    if appConfig.enableDB:
+        dbUtils.truncateTable("two_line_element")
+
+    return loadTwoLineElement()
 
 
 if __name__ == "__main__":
     # clear cache && db
     clearMemcache()
-    dbUtils.dbTruncateTable("two_line_element")
+    # dbUtils.truncateTable("two_line_element")
     # change setting
     appConfig.enableDB = True
     appConfig.enableMemcache = False
     # test db clear/read/write
     for _ in range(10):
-        print(loadTLE())
+        print(loadTwoLineElement())

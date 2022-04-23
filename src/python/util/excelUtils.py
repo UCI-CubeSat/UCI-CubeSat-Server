@@ -5,8 +5,13 @@ import openpyxl
 from src.python.util import filepathUtils
 from src.python.service import satnogsService
 
-TABS = {0: "allSatellite", 1: "filteredSatellite", 2: "sortedSatellite", 3: "TLE"}
-FILE_DIR = filepathUtils.getRoot() + "/CubeSAT/satnogs" + str(datetime.now().date()) + ".xlsx"
+TABS = {
+    0: "allSatellite",
+    1: "filteredSatellite",
+    2: "sortedSatellite",
+    3: "TLE"}
+FILE_DIR = filepathUtils.getRoot() + "/CubeSAT/satnogs" + \
+    str(datetime.now().date()) + ".xlsx"
 DATA_0 = satnogsService.getSatellite()
 DATA_1 = satnogsService.satelliteFilter(DATA_0)
 DATA_2 = satnogsService.sortMostRecent(DATA_1)
