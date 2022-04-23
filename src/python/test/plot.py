@@ -11,7 +11,6 @@ from src.python.service import skyfieldService, tleService
 
 matplotlib.use("TkAgg")
 
-
 IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg"
 IRVINE = wgs84.latlon(33.643831, -117.841132, elevation_m=17)
 DURATION = 2.0 * 3600
@@ -30,8 +29,6 @@ def getAllSat():
     response = tleService.loadTLE()
     for k in response.keys():
         satellites.append(skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION))
-    # for debug
-    # print(len(satellites), satellites[0])
     return satellites
 
 
@@ -72,6 +69,7 @@ def plotPath() -> FuncAnimation:
     return animation.FuncAnimation(fig, update, frames=len(data) - 1,
                                    init_func=init, interval=1000)
 
+
 def plotRealTime():
     satelliteToPlot = getAllSat()[0]
 
@@ -80,8 +78,8 @@ def plotRealTime():
     ax = fig.add_subplot()
     img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format='jpg')
 
-    x=satelliteToPlot["lngArray"]
-    y=satelliteToPlot["latArray"]
+    x = satelliteToPlot["lngArray"]
+    y = satelliteToPlot["latArray"]
 
     # create the first plot
     point, = ax.plot([x[0]], [y[0]], 'ro')
@@ -101,15 +99,14 @@ def plotRealTime():
         point.set_data(np.array([x[n], y[n]]))
         return point
 
-    ani=animation.FuncAnimation(fig, update_point, 99, fargs=(x, y, point))
-
-    pyplot.show()
+    return animation.FuncAnimation(fig, update_point, 99, fargs=(x, y, point))
 
 
 if __name__ == "__main__":
-    a = plotPath() # flight path of every available satellite
+    # flight path of every available satellite
+    _ = plotPath()
 
     # for every available satellite, an animation of its flight path
-    b = plotRealTime()
+    _ = plotRealTime()
 
     pyplot.show()
