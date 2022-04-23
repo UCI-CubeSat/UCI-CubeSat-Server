@@ -39,10 +39,10 @@ def isRecent(timestamp: datetime) -> bool:
         lastTimestamp = timestamp
     currentTimestamp: datetime = datetime.now()
     return (
-                   currentTimestamp -
-                   lastTimestamp).days == 0 and (
-                   currentTimestamp -
-                   lastTimestamp).seconds < 86400
+        currentTimestamp -
+        lastTimestamp).days == 0 and (
+        currentTimestamp -
+        lastTimestamp).seconds < 86400
 
 
 def clearMemcache():

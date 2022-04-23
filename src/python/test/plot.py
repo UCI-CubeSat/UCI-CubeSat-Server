@@ -28,7 +28,12 @@ def getAllSat():
     satellites = []
     response = tleService.loadTLE()
     for k in response.keys():
-        satellites.append(skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION))
+        satellites.append(
+            skyfieldService.getPath(
+                response[k],
+                "latLng",
+                DURATION,
+                RESOLUTION))
     return satellites
 
 
@@ -41,17 +46,29 @@ def plotPath() -> FuncAnimation:
         ax.set_xlim([-180, 180])
         ax.set_ylim([-90, 90])
         ax.imshow(img, origin='upper', extent=[-180, 180, -90, 90], alpha=0.75)
-        ax.annotate(f'. {"Irvine, CA"}', (-117.841132, 33.643831), color='black')
+        ax.annotate(
+            f'. {"Irvine, CA"}',
+            (-117.841132,
+             33.643831),
+            color='black')
         ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
         ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
         ax.set(xlabel='longitude', ylabel='latitude', title='NAME')
 
     def init():
         setup()
-        ax.set(xlabel='longitude', ylabel='latitude', title=data[0]["identifier"])
+        ax.set(
+            xlabel='longitude',
+            ylabel='latitude',
+            title=data[0]["identifier"])
         lng = data[0]["lngArray"]
         lat = data[0]["latArray"]
-        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(
+            lng,
+            lat,
+            'black',
+            label='ground track',
+            linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
@@ -59,10 +76,16 @@ def plotPath() -> FuncAnimation:
         ax.cla()
         # gc.collect()
         setup()
-        ax.set(xlabel='longitude', ylabel='latitude', title=data[frame + 1]["identifier"])
+        ax.set(xlabel='longitude', ylabel='latitude',
+               title=data[frame + 1]["identifier"])
         lng = data[frame + 1]["lngArray"]
         lat = data[frame + 1]["latArray"]
-        currPath = ax.plot(lng, lat, 'black', label='ground track', linewidth=2)
+        currPath = ax.plot(
+            lng,
+            lat,
+            'black',
+            label='ground track',
+            linewidth=2)
         ax.legend(loc='lower right')
         return currPath,
 
@@ -92,7 +115,8 @@ def plotRealTime():
     # ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
     ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
     ax.annotate(f'. {"Sydney, AUS"}', (151.2093, -33.8688), color='black')
-    ax.set(xlabel='longitude', ylabel='latitude', title=satelliteToPlot["identifier"])
+    ax.set(xlabel='longitude', ylabel='latitude',
+           title=satelliteToPlot["identifier"])
 
     # move the point position at every frame
     def update_point(n, x, y, point):
