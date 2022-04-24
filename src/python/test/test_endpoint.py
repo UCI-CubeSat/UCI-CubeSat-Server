@@ -27,6 +27,7 @@ def testStatus():
     async def asyncTestStatus():
         async with aiohttp.ClientSession() as session:
             data = await asyncRequest(session, heartBeatUrl)
+        assert isinstance(data, dict)
         assert data["status"] == "online"
         assert data["satnogs"]["status"] == "online"
         assert data["database"]["status"] == "online"
@@ -41,18 +42,20 @@ def testTle():
     assert getTle.status_code == 200
     getTle = requests.get(tleUrl)
     assert getTle.status_code == 200
+    assert isinstance(getTle.json(), dict)
 
 
 def testCalculation():
     runCalculation = requests.get(calculationUrl)
     assert runCalculation.status_code == 200
+    assert isinstance(runCalculation.json(), dict)
 
 
 def testAvailableSatellite():
     getAvailableSatellite = requests.get(availableSatelliteUrl)
     assert getAvailableSatellite.status_code == 200
-    assert str(type(getAvailableSatellite.json())) == "<class 'list'>"
     assert len(getAvailableSatellite.json()) != 0
+    assert isinstance(getAvailableSatellite.json(), list)
 
 
 def testPrediction():
@@ -65,6 +68,7 @@ def testPrediction():
             asyncResponse = await asyncRequestAll(session, requestUrls)
 
             for data in asyncResponse:
+                assert isinstance(data, dict)
                 for peak in data.keys():
                     assert isValidIso(peak) and isValidIso(
                         data[peak]["rise"]) and isValidIso(
