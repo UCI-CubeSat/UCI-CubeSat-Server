@@ -1,5 +1,3 @@
-import time
-
 from faker import Faker
 
 Faker.seed()
@@ -29,10 +27,8 @@ def generateVoltage():
 
 def generateLngLat():
     """
-
     Returns: any valid {lng: Decimal('13.4134995'),
                 lat: Decimal('13.4134995')}
-
     """
     return dict(lng=fake.longitude(),
                 lat=fake.latitude())
