@@ -3,6 +3,7 @@ import os
 from sys import platform as _platform
 from dotenv import load_dotenv
 from flask import Flask
+from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_talisman import Talisman
 import psycopg
@@ -19,6 +20,7 @@ enableMemcache = _platform == "darwin" and False  # always False on non-macOS
 
 # flask config setting
 app = Flask(__name__)
+websocket = SocketIO(app)
 CORS(app)
 Talisman(app, content_security_policy=None)
 

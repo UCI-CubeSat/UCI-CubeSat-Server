@@ -7,7 +7,7 @@ import time
 
 from src.python.config import appConfig
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
-from src.python.config.appConfig import app
+from src.python.config.appConfig import app, websocket
 
 
 @app.route(f'/', methods=['GET'])
@@ -158,4 +158,4 @@ def serverMetric():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    websocket.run(app)
