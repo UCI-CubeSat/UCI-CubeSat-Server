@@ -1,6 +1,8 @@
+from datetime import datetime
 import flask
 import requests
-from flask import request
+from flask import request, Response
+from requests import Response
 from skyfield.toposlib import wgs84
 import urllib
 import time
@@ -27,10 +29,10 @@ def getHomePage():
 
 @app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
 def getServerStatus():
-    satnogsRequest = requests.get(satnogsService.TLE_URL)
-    dbRequest: dict = tleService.readTwoLineElement()
+    satnogsRequest: Response = requests.get(satnogsService.TLE_URL)
+    dbRequest: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
     try:
-        response = flask.jsonify({
+        response: Response = flask.jsonify({
             "status": "online",
             "satnogs": {
                 "status": "online" if satnogsRequest.status_code == 200 else "offline"
@@ -50,7 +52,7 @@ def getServerStatus():
 
 @app.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
 def getTwoLineElement():
-    refresh = request.args.get("refresh", default="false", type=str)
+    refresh: str = request.args.get("refresh", default="false", type=str)
     return flask.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
         else flask.jsonify(tleService.readTwoLineElement())
 
@@ -79,22 +81,22 @@ def getAvailableSatellite():
 
 @app.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
 def getSatelliteState():
-    name = request.args.get("name", default="AmicalSat", type=str).upper()
-    duration = request.args.get("duration", default=3600.0, type=float)
-    data = tleService.readTwoLineElement()
+    name: str = request.args.get("name", default="AmicalSat", type=str).upper()
+    duration: float = request.args.get("duration", default=3600.0, type=float)
+    data: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
 
     try:
-        satellite_tle = data[name] if name in data.keys(
+        satellite_tle: dict[str, str | datetime] = data[name] if name in data.keys(
         ) else data[f'0 {name}']
     except KeyError:
         return flask.jsonify({})
 
-    response = skyfieldService.getSphericalPath(
+    response: dict[str, object] = skyfieldService.getSphericalPath(
         satellite_tle, duration, 60.0 / 60.0)
-    currLatLng: tuple = response["origin"]
-    currLatPath: list = response["latArray"]
-    currLngPath: list = response["lngArray"]
-    currLatLngPath: list = response["latLngArray"]
+    currLatLng: tuple[float, float] = response["origin"]
+    currLatPath: list[float] = response["latArray"]
+    currLngPath: list[float] = response["lngArray"]
+    currLatLngPath: list[tuple[float, float]] = response["latLngArray"]
     return flask.jsonify({"latLng": {"lat": currLatLng[0], "lng": currLatLng[1]},
                           "latPath": list(currLatPath),
                           "lngPath": list(currLngPath),
@@ -104,15 +106,15 @@ def getSatelliteState():
 
 @app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['GET'])
 def getHorizon():
-    satellite = urllib.parse.unquote(
+    satellite: str = urllib.parse.unquote(
         request.args.get(
             "satellite",
             default="",
             type=str))
-    latitude = request.args.get("latitude", type=float)
-    longitude = request.args.get("longitude", type=float)
-    elevation = request.args.get("elevation", default=0, type=int)
-    duration = request.args.get(
+    latitude: float | None = request.args.get("latitude", type=float)
+    longitude: float | None = request.args.get("longitude", type=float)
+    elevation: int = request.args.get("elevation", default=0, type=int)
+    duration: float = request.args.get(
         "duration",
         default=1 * 24 * 3600.0,
         type=float)
@@ -133,11 +135,11 @@ def addEmailSubscriber():
 
 @app.route(f'{appConfig.apiBaseUrl}/serverMetric', methods=['GET'])
 def serverMetric():
-    duration = request.args.get("duration", default=3600.0 * 24, type=float)
+    duration: float = request.args.get("duration", default=3600.0 * 24, type=float)
 
-    t = time.perf_counter()
-    kvSet = tleService.readTwoLineElement()
-    initialLoadTime = time.perf_counter() - t
+    t: float = time.perf_counter()
+    kvSet: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
+    initialLoadTime: float = time.perf_counter() - t
     keySet: list = kvSet.keys()
     t = time.perf_counter()
     for satellite in keySet:
@@ -145,7 +147,7 @@ def serverMetric():
             kvSet[satellite], duration, wgs84.latlon(
                 33.6405, -117.8443, elevation_m=0))
 
-    calculationTime = time.perf_counter() - t
+    calculationTime: float = time.perf_counter() - t
 
     return flask.jsonify({
         "Initial Load Cost:": initialLoadTime,
