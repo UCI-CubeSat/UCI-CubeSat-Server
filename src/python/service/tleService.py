@@ -18,7 +18,7 @@ def getTwoLineElement() -> {dict}:
     tleList = satnogsService.tleFilter(
         satnogsService.sortMostRecent(
             satnogsService.getSatellite()))
-    keys = [tle['tle0'] for tle in tleList]
+    keys = [twoLineElement['tle0'] for twoLineElement in tleList]
     return dict(zip(keys, tleList))
 
 
@@ -33,10 +33,10 @@ def isRecent(timestamp: datetime) -> bool:
         lastTimestamp = timestamp
     currentTimestamp: datetime = datetime.now()
     return (
-                   currentTimestamp -
-                   lastTimestamp).days == 0 and (
-                   currentTimestamp -
-                   lastTimestamp).seconds < 86400
+        currentTimestamp -
+        lastTimestamp).days == 0 and (
+        currentTimestamp -
+        lastTimestamp).seconds < 86400
 
 
 def clearMemcache():
@@ -93,30 +93,30 @@ def writeDatabase(data):
 
 def readDatabase() -> {dict}:
     if not appConfig.enableDB:
-        return saveTwoLineElement()
+        return writeTwoLineElement()
 
     timestamp, = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
-        return saveTwoLineElement()
+        return writeTwoLineElement()
 
     if not isRecent(timestamp):
         logging.warning("WARNING: db outdated")
-        return saveTwoLineElement()
+        return writeTwoLineElement()
 
     dbData: dict = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
-    data: dict = dict(zip([tle['tle0']
-                           for tle in dbData], [dict(kv) for kv in dbData]))
+    data: dict = dict(zip([twoLineElement['tle0'] for twoLineElement in dbData], [
+                      dict(kv) for kv in dbData]))
 
     if data:
         writeMemcache(data)
         logging.warning("INFO: reading from db")
         return data
 
-    return saveTwoLineElement()
+    return writeTwoLineElement()
 
 
-def saveTwoLineElement() -> {dict}:
+def writeTwoLineElement() -> {dict}:
     data = getTwoLineElement()
 
     if appConfig.enableMemcache:
@@ -132,7 +132,7 @@ def saveTwoLineElement() -> {dict}:
     return data
 
 
-def loadTwoLineElement() -> {dict}:
+def readTwoLineElement() -> {dict}:
     data = readMemcache()
     return data if data else readDatabase()
 
@@ -143,7 +143,7 @@ def refreshTwoLineElement() -> {dict}:
     if appConfig.enableDB:
         dbUtils.truncateTable("two_line_element")
 
-    return loadTwoLineElement()
+    return readTwoLineElement()
 
 
 if __name__ == "__main__":
@@ -167,5 +167,5 @@ if __name__ == "__main__":
     appConfig.enableMemcache = True
     # test db clear/read/write
     for _ in range(3):
-        tle = loadTwoLineElement()
+        tle = readTwoLineElement()
         print(tle, len(tle))

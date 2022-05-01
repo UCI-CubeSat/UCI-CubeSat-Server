@@ -28,7 +28,7 @@ def getHomePage():
 @flaskServer.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
 def getServerStatus():
     satnogsRequest = requests.get(satnogsService.TLE_URL)
-    dbRequest: dict = tleService.loadTwoLineElement()
+    dbRequest: dict = tleService.readTwoLineElement()
     try:
         response = flask.jsonify({
             "status": "online",
@@ -52,7 +52,7 @@ def getServerStatus():
 def getTwoLineElement():
     refresh = request.args.get("refresh", default="false", type=str)
     return flask.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
-        else flask.jsonify(tleService.loadTwoLineElement())
+        else flask.jsonify(tleService.readTwoLineElement())
 
 
 @flaskServer.route(f'{appConfig.apiBaseUrl}/geocoding', methods=['POST'])
@@ -74,14 +74,14 @@ def getLatLong():
 
 @flaskServer.route(f'{appConfig.apiBaseUrl}/available_satellite', methods=['GET'])
 def getAvailableSatellite():
-    return flask.jsonify(list(tleService.loadTwoLineElement().keys()))
+    return flask.jsonify(list(tleService.readTwoLineElement().keys()))
 
 
 @flaskServer.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
 def getSatelliteState():
     name = request.args.get("name", default="AmicalSat", type=str).upper()
     duration = request.args.get("duration", default=3600.0, type=float)
-    data = tleService.loadTwoLineElement()
+    data = tleService.readTwoLineElement()
 
     try:
         satellite_tle = data[name] if name in data.keys(
@@ -121,7 +121,7 @@ def getHorizon():
         return flask.jsonify({})
 
     return flask.jsonify(skyfieldService.findHorizonTime(
-        tleService.loadTwoLineElement()[satellite], duration, wgs84.latlon(
+        tleService.readTwoLineElement()[satellite], duration, wgs84.latlon(
             latitude, longitude, elevation_m=elevation)))
 
 
@@ -136,7 +136,7 @@ def serverMetric():
     duration = request.args.get("duration", default=3600.0 * 24, type=float)
 
     t = time.perf_counter()
-    kvSet = tleService.loadTwoLineElement()
+    kvSet = tleService.readTwoLineElement()
     initialLoadTime = time.perf_counter() - t
     keySet: list = kvSet.keys()
     t = time.perf_counter()
