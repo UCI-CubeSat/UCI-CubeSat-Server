@@ -17,7 +17,7 @@ import bmemcached
 
 # db/memcache config setting
 enableDB = True
-enableMemcache = _platform == "darwin" and False  # always False on non-macOS
+enableMemcache = True  # always False on non-macOS
 
 # flask config setting
 flaskServer = Flask(__name__)
