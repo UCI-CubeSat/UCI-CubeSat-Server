@@ -2,22 +2,15 @@
 Read/Write TLE data from:
 a. satnog API
 b. postgre Database
-c. memcache
+c. memcached
 """
-
-import ast
 import logging
-import subprocess
 from datetime import datetime
-
-from pymemcache.client import base
 
 from src.python.database import dbUtils
 from src.python.config import appConfig
+from src.python.config.appConfig import memcached
 from src.python.service import satnogsService
-
-# config for memcache
-client = base.Client(('localhost', 11211))
 
 
 def getTwoLineElement() -> {dict}:
@@ -39,73 +32,47 @@ def isRecent(timestamp: datetime) -> bool:
         lastTimestamp = timestamp
     currentTimestamp: datetime = datetime.now()
     return (
-        currentTimestamp -
-        lastTimestamp).days == 0 and (
-        currentTimestamp -
-        lastTimestamp).seconds < 86400
+                   currentTimestamp -
+                   lastTimestamp).days == 0 and (
+                   currentTimestamp -
+                   lastTimestamp).seconds < 86400
 
 
 def clearMemcache():
-    if not client.get("keySet") is None:
-        keySet = ast.literal_eval((client.get("keySet")).decode("utf-8"))
-        for key in keySet:
-            client.set(key.replace(" ", "_"), None)
-
-    client.set("currTime", None)
-    client.set("keySet", None)
-    client.flush_all()
+    memcached.flush_all()
 
 
-def writeMemcache(data):
+def writeMemcache(data: dict):
     if not appConfig.enableMemcache:
         return
 
-    currTime = datetime.now()
-    client.set("currTime", currTime)
-    keySet = set(data.keys())
-    client.set("keySet", keySet)
+    keySet: list = list(data.keys())
+    memcached.set("keySet", keySet)
+
     for key in keySet:
-        client.set(key.replace(" ", "_"), data[key])
+        memcached.set(key, dict(tle0=key,
+                                tle1=data[key]['tle1'],
+                                tle2=data[key]['tle2'],
+                                updated=datetime.now()))
 
 
-def readMemcache():
+def readMemcache() -> {dict}:
     if not appConfig.enableMemcache:
         return None
 
-    try:
-        timestamp = client.get("currTime")
-    except ConnectionRefusedError:
-        timestamp = None
-        subprocess.run(["brew", "services", "stop", "memcached"])
-        subprocess.run(["brew", "install", "memcached"])
-        subprocess.run(["brew", "services", "start", "memcached"])
+    keySet: list = memcached.get("keySet", default=[])
 
-    if timestamp is None:
-        logging.warning("WARNING: cache miss")
-        return None
+    if keySet:
+        timestamp = memcached.get(keySet[0])["updated"]
+    else:
+        return readDatabase()
 
     if not isRecent(timestamp):
-        logging.warning("WARNING: cache outdated")
-        return None
+        logging.warning("WARNING: mc outdated")
+        return readDatabase()
 
-    logging.info("LOGGING: cache hit")
-    data = {}
-    keySet: list = ast.literal_eval((client.get("keySet")).decode("utf-8"))
-
-    for key in keySet:
-        value = client.get(key.replace(" ", "_")).decode(
-            "utf-8")  # byte -> str
-        # TODO:
-        #  ast.literal_eval is crashing here, if appConfig.enableMemcache = True
-        #  we keep track of when data is last fetch, db and memcache is using
-        #  different way of storing that information
-        #  memcache is using cache[currTime], while db is using tle[updated]
-        #  tle[updated] is a datetime object:
-        #  'updated': datetime.datetime(2022, 2, 23, 20, 11, 46, 245761)
-        #  cache[currTime] is a string:
-        #  2022-02-24 12:38:43.867728
-        data[key] = ast.literal_eval(value)  # str -> dict
-    return data
+    logging.warning("INFO: reading from mc")
+    return {key: memcached.get(key) for key in keySet}
 
 
 def writeDatabase(data):
@@ -125,7 +92,7 @@ def writeDatabase(data):
     dbUtils.insertAll("two_line_element", data)
 
 
-def readDatabase():
+def readDatabase() -> {dict}:
     if not appConfig.enableDB:
         return saveTwoLineElement()
 
@@ -144,6 +111,7 @@ def readDatabase():
 
     if data:
         writeMemcache(data)
+        logging.warning("INFO: reading from db")
         return data
 
     return saveTwoLineElement()
@@ -185,7 +153,8 @@ if __name__ == "__main__":
     # dbUtils.truncateTable("two_line_element")
     # change setting
     appConfig.enableDB = True
-    appConfig.enableMemcache = False
+    appConfig.enableMemcache = True
     # test db clear/read/write
-    for _ in range(10):
-        print(loadTwoLineElement())
+    for _ in range(3):
+        tle = loadTwoLineElement()
+        print(tle, len(tle))

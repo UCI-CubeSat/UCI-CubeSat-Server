@@ -7,6 +7,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_talisman import Talisman
 import psycopg
+import bmemcached
 # import logging
 
 # logging config setting
@@ -26,6 +27,11 @@ flaskWebSocket = SocketIO(flaskServer)
 
 # load secret from .env
 load_dotenv()
+
+# Heroku Memcached
+memcached = bmemcached.Client(os.environ.get('MEMCACHEDCLOUD_SERVERS').split(','),
+                       os.environ.get('MEMCACHEDCLOUD_USERNAME'),
+                       os.environ.get('MEMCACHEDCLOUD_PASSWORD'))
 
 # Heroku Postgre
 dbUrl = os.getenv("DATABASE_URL")
