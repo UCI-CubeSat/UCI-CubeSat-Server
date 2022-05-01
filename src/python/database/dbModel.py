@@ -1,8 +1,8 @@
-from src.python.config.appConfig import app
+from src.python.config.appConfig import flaskServer
 from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(flaskServer)
 
 
 class TwoLineElement(db.Model):
