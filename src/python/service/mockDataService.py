@@ -4,28 +4,28 @@ Faker.seed()
 fake = Faker()
 
 
-def generateTimestamp():
+def generateTimestamp() -> fake.future_datetime:
     """
     Returns: any future datetime(year, month, day, hour, minute, second)
     """
     return fake.future_datetime()
 
 
-def generateTemperature():
+def generateTemperature() -> fake.pyfloat:
     """
     Returns: any float between -40°C to +105°C (AEC-Q100 Level 2)
     """
     return fake.pyfloat(min_value=-40, max_value=105)
 
 
-def generateVoltage():
+def generateVoltage() -> fake.pyfloat:
     """
     Returns: any float between -5V to +5V
     """
     return fake.pyfloat(min_value=-5, max_value=5)
 
 
-def generateLngLat():
+def generateLngLat() -> dict[str, fake.pydecimal]:
     """
     Returns: any valid {lng: Decimal('13.4134995'),
                 lat: Decimal('13.4134995')}
@@ -34,7 +34,7 @@ def generateLngLat():
                 lat=fake.latitude())
 
 
-def generateLocation():
+def generateLocation() -> dict[str, fake.pydecimal | str]:
     """
 
     Returns: any valid {lng: Decimal('13.4134995'),

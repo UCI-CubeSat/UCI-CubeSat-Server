@@ -5,21 +5,21 @@ Fetch TLE data from satnog API
 import requests
 from src.python.config import appConfig
 
-TRANSMITTER_URL = f"https://db.satnogs.org/api/transmitters/?key={appConfig.satnogsApiKey}&format=json"
-SATELLITE_URL = f"https://db.satnogs.org/api/satellites/?key={appConfig.satnogsApiKey}&format=json"
-TLE_URL = f"https://db.satnogs.org/api/tle/?key={appConfig.satnogsApiKey}&format=json"
+TRANSMITTER_URL: str = f"https://db.satnogs.org/api/transmitters/?key={appConfig.satnogsApiKey}&format=json"
+SATELLITE_URL: str = f"https://db.satnogs.org/api/satellites/?key={appConfig.satnogsApiKey}&format=json"
+TLE_URL: str = f"https://db.satnogs.org/api/tle/?key={appConfig.satnogsApiKey}&format=json"
 
 
-def getIdentifier() -> set:
+def getIdentifier() -> set[str]:
     return {sat["norad_cat_id"] for sat in requests.get(SATELLITE_URL).json()}
 
 
-def getSatellite() -> [dict]:
+def getSatellite() -> list[dict[str, str]]:
     """
     :return: A list of all available Satellite's basic info from Satnogs
     """
-    sat = {s["norad_cat_id"]: s["name"]
-           for s in requests.get(SATELLITE_URL).json()}
+    sat: dict[str, str] = {s["norad_cat_id"]: s["name"]
+                           for s in requests.get(SATELLITE_URL).json()}
 
     return [{"name": sat[s["norad_cat_id"]], "description": s["description"],
              "norad_cat_id": s["norad_cat_id"],
@@ -28,7 +28,7 @@ def getSatellite() -> [dict]:
             for s in requests.get(TRANSMITTER_URL).json() if s["alive"]]
 
 
-def getTwoLineElement() -> {dict}:
+def getTwoLineElement() -> dict[str, dict[str, str]]:
     """
     :return: A list of all available Satellite's TLE from Satnogs
     """
@@ -37,9 +37,9 @@ def getTwoLineElement() -> {dict}:
 
 
 def satelliteFilter(
-        satelliteList: [dict],
+        satelliteList: list[dict[str, str]],
         mode: str = "AFSK",
-        baud: int = 1200) -> [dict]:
+        baud: int = 1200) -> list[dict[str, str]]:
     """
     filter the list of satellite by modulation mode and baud rate
     :param satelliteList: List of Satellite information from Satnogs
@@ -52,7 +52,7 @@ def satelliteFilter(
             and sat["baud"] is not None and baud == sat["baud"]]
 
 
-def sortMostRecent(satelliteList: [dict], recent: bool = True) -> [dict]:
+def sortMostRecent(satelliteList: list[dict[str, str]], recent: bool = True) -> list[dict[str, str]]:
     """
     filter the list of satellite by modulation mode and baud rate
     :param satelliteList: List of Satellite information from Satnogs
@@ -66,7 +66,7 @@ def sortMostRecent(satelliteList: [dict], recent: bool = True) -> [dict]:
                                   reverse=recent) if int(sat["time"][0:4]) >= 2021]
 
 
-def getNoradId(satelliteList: [dict]) -> {str}:
+def getNoradId(satelliteList: list[dict[str, str]]) -> set[str]:
     """
     get a set of NoradID from dict, using set to improve
     search performance from O(n) to O(1)
@@ -77,7 +77,7 @@ def getNoradId(satelliteList: [dict]) -> {str}:
     return {sat["norad_cat_id"] for sat in satelliteList}
 
 
-def tleFilter(satelliteList: [dict]) -> [dict]:
+def tleFilter(satelliteList: list[dict[str, str]]) -> list[dict[str, str]]:
     """
     Push TLE information from Satnogs based on given NoRadID
     :param satelliteList: List of Satellite information from Satnogs
@@ -86,3 +86,7 @@ def tleFilter(satelliteList: [dict]) -> [dict]:
 
     return [sat for sat in getTwoLineElement().values(
     ) if sat["norad_cat_id"] in getNoradId(satelliteList)]
+
+
+if __name__ == "__main__":
+    pass

@@ -1,6 +1,7 @@
 import psycopg2
 import psycopg
 from psycopg.rows import dict_row
+from datetime import datetime
 
 from src.python.database import dbQueries
 from src.python.config.appConfig import dbCredential, psycopg2Config
@@ -13,23 +14,23 @@ connectionConfigRowFactory = dict(
     row_factory=dict_row)
 
 
-def insertAll(tableName, entryArray: list):
+def insertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) -> None:
     truncateTable(tableName)
 
     with psycopg2.connect(**psycopg2Config) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:
-                value = ','.join(
+                value: str = ','.join(
                     dbCursor.mogrify(
                         "(%s,%s,%s,%s)",
                         entry).decode("utf-8") for entry in entryArray)
-                query = f"INSERT INTO {tableName} VALUES {value}"
+                query: str = f"INSERT INTO {tableName} VALUES {value}"
                 dbCursor.execute(query)
         except psycopg.errors.Error:
             dbConnection.close()
 
 
-def fetch(queryName, *args):
+def fetch(queryName: str, *args: object) -> object | None:
     with psycopg.connect(**connectionConfig) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:
@@ -42,11 +43,13 @@ def fetch(queryName, *args):
             dbConnection.close()
 
 
-def fetchAll(queryName, *args, **kwargs):
+def fetchAll(queryName: str,
+             *args: object,
+             **kwargs: object) -> None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]]:
     if 'dict' in kwargs.keys() and kwargs['dict']:
-        config = connectionConfigRowFactory
+        config: dict[str, object] = connectionConfigRowFactory
     else:
-        config = connectionConfig
+        config: dict[str, object] = connectionConfig
     with psycopg.connect(**config) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:
@@ -55,7 +58,7 @@ def fetchAll(queryName, *args, **kwargs):
                 else:
                     dbCursor.execute(dbQueries.queries[queryName]())
 
-                dbResponse: [()] = dbCursor.fetchall()
+                dbResponse: list[tuple[str, str, str, datetime]] = dbCursor.fetchall()
                 return None if len(dbResponse) == 0 else dbResponse[0] if len(
                     dbResponse) == 1 else dbResponse
 
@@ -63,7 +66,7 @@ def fetchAll(queryName, *args, **kwargs):
             dbConnection.close()
 
 
-def dropTable(tableName):
+def dropTable(tableName: str) -> None:
     with psycopg.connect(**connectionConfig) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:
@@ -72,7 +75,7 @@ def dropTable(tableName):
             dbConnection.close()
 
 
-def truncateTable(tableName):
+def truncateTable(tableName: str) -> None:
     with psycopg.connect(**connectionConfig) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:

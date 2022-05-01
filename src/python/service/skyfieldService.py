@@ -7,13 +7,15 @@ import collections
 import datetime
 import json
 import numpy
-from skyfield.toposlib import wgs84
+from numpy import ndarray
+from skyfield.positionlib import Geometric, Geocentric, Barycentric, ICRF
+from skyfield.toposlib import wgs84, GeographicPosition
 from skyfield.api import EarthSatellite, load
-from skyfield.timelib import Time
+from skyfield.timelib import Time, Timescale
 
 
 def getPath(
-        data: dict,
+        data: dict[str, dict[str, str | datetime.datetime]],
         mode: str = "latLng",
         duration: float = 10 * 3600,
         resolution: float = 4.0) -> dict:
@@ -21,18 +23,19 @@ def getPath(
         else getCartesianPath(data, duration, resolution)
 
 
-def getSphericalPath(data: dict, duration: float, resolution: float) -> dict:
-    response = {}
-    satellite = EarthSatellite(
+def getSphericalPath(data: dict[str, dict[str, str | datetime.datetime]],
+                     duration: float,
+                     resolution: float) -> dict[str, object]:
+    satellite: EarthSatellite = EarthSatellite(
         data["tle1"],
         data["tle2"],
         data["tle0"],
         load.timescale())
-    ts = load.timescale()
-    t = ts.now()
+    ts: Timescale = load.timescale()
+    t: Time = ts.now()
     start = t.utc.second
 
-    interval = ts.utc(
+    interval: Time = ts.utc(
         t.utc.year,
         t.utc.month,
         t.utc.day,
@@ -44,9 +47,10 @@ def getSphericalPath(data: dict, duration: float, resolution: float) -> dict:
             duration,
             resolution *
             60))
-    location = satellite.at(interval)
-    path = wgs84.subpoint(location)
+    location: Geometric | Geocentric | Barycentric | ICRF = satellite.at(interval)
+    path: GeographicPosition = wgs84.subpoint(location)
 
+    response: dict[str, object] = dict()
     response["timestamp"]: datetime.time = t.utc
     response["identifier"]: str = data["tle0"]
     response["origin"]: tuple = (
@@ -63,18 +67,19 @@ def getSphericalPath(data: dict, duration: float, resolution: float) -> dict:
     return response
 
 
-def getCartesianPath(data, duration, resolution):
-    response = {}
-    satellite = EarthSatellite(
+def getCartesianPath(data: dict[str, dict[str, str | datetime.datetime]],
+                     duration: float,
+                     resolution: float) -> dict[str, object]:
+    satellite: EarthSatellite = EarthSatellite(
         data["tle1"],
         data["tle2"],
         data["tle0"],
         load.timescale())
-    ts = load.timescale()
-    t = ts.now()
+    ts: Timescale = load.timescale()
+    t: Time = ts.now()
     start = t.utc.second
 
-    interval = ts.utc(
+    interval: Time = ts.utc(
         t.utc.year,
         t.utc.month,
         t.utc.day,
@@ -86,8 +91,8 @@ def getCartesianPath(data, duration, resolution):
             duration,
             resolution *
             60))
-    location = satellite.at(interval)
-    d = numpy.array([])
+    location: Geometric | Geocentric | Barycentric | ICRF = satellite.at(interval)
+    d: ndarray = numpy.array([])
 
     for i in range(len(location.position.km[0])):
         numpy.append(d,
@@ -97,6 +102,7 @@ def getCartesianPath(data, duration, resolution):
                                                                                                  0,
                                                                                                  0]))))
 
+    response: dict[str, object] = dict()
     response["identifier"]: str = data["tle0"]
     response["x"]: numpy.array = location.position.km[0]
     response["y"]: numpy.array = location.position.km[1]
@@ -107,9 +113,9 @@ def getCartesianPath(data, duration, resolution):
     return response
 
 
-def getSerializedPath(data: dict):
+def getSerializedPath(data: dict[str, object]) -> dict[str, object]:
     for k in data.keys():
-        if str(type(data[k])) == "<class 'numpy.ndarray'>":
+        if isinstance(data[k], numpy.ndarray):
             data[k] = data[k].tolist()
         else:
             data[k] = str(data[k])
@@ -118,18 +124,18 @@ def getSerializedPath(data: dict):
 
 
 def findHorizonTime(
-        data: list,
+        data: dict[str, dict[str, str | datetime.datetime]],
         duration: float,
         receiverLocation: wgs84.latlon) -> json:
-    satellite = EarthSatellite(
+    satellite: EarthSatellite = EarthSatellite(
         data["tle1"],
         data["tle2"],
         data["tle0"],
         load.timescale())
-    timestamp = load.timescale()
-    start = load.timescale().now()
+    timestamp: Timescale = load.timescale()
+    start: Time = load.timescale().now()
 
-    end = timestamp.utc(
+    end: Time = timestamp.utc(
         start.utc.year,
         start.utc.month,
         start.utc.day,
@@ -137,12 +143,12 @@ def findHorizonTime(
         start.utc.minute,
         start.utc.second +
         duration)
-    condition = {
+    condition: dict[str, float] = {
         "bare": 1.0,
         "marginal": 30.0,
         "good": 45.0,
         "excellent": 60.0}
-    degree = condition["bare"]  # peak is at 90
+    degree: float = condition["bare"]  # peak is at 90
     timestampUtc, events = satellite.find_events(
         receiverLocation, start, end, altitude_degrees=degree)
 

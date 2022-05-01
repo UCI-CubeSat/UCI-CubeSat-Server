@@ -5,7 +5,6 @@ b. postgre Database
 c. memcached
 """
 import logging
-import time
 from datetime import datetime
 
 from src.python.database import dbUtils
@@ -14,11 +13,11 @@ from src.python.config.appConfig import memcached
 from src.python.service import satnogsService
 
 
-def getTwoLineElement() -> {dict}:
-    tleList = satnogsService.tleFilter(
+def getTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+    tleList: list[dict[str, str]] = satnogsService.tleFilter(
         satnogsService.sortMostRecent(
             satnogsService.getSatellite()))
-    keys = [twoLineElement['tle0'] for twoLineElement in tleList]
+    keys: list[str] = [twoLineElement['tle0'] for twoLineElement in tleList]
     return dict(zip(keys, tleList))
 
 
@@ -27,23 +26,23 @@ def isRecent(timestamp: datetime) -> bool:
         return False
 
     if not isinstance(timestamp, datetime):
-        lastTimestamp = datetime.strptime(
+        lastTimestamp: datetime = datetime.strptime(
             timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
     else:
-        lastTimestamp = timestamp
+        lastTimestamp: datetime = timestamp
     currentTimestamp: datetime = datetime.now()
     return (
-        currentTimestamp -
-        lastTimestamp).days == 0 and (
-        currentTimestamp -
-        lastTimestamp).seconds < 86400
+                   currentTimestamp -
+                   lastTimestamp).days == 0 and (
+                   currentTimestamp -
+                   lastTimestamp).seconds < 86400
 
 
-def clearMemcache():
+def clearMemcache() -> None:
     memcached.flush_all()
 
 
-def writeMemcache(data: dict):
+def writeMemcache(data: dict) -> None:
     if not appConfig.enableMemcache:
         return
 
@@ -54,15 +53,16 @@ def writeMemcache(data: dict):
                              updated=datetime.now()) for key in data.keys()})
 
 
-def readMemcache() -> {dict}:
+def readMemcache() -> dict[str, dict[str, str | datetime]]:
     if not appConfig.enableMemcache:
         return None
 
-    twoLineElement: dict = memcached.get("two_line_element", default=dict())
+    twoLineElement: dict[str, dict[str, str | datetime]] | dict[None, None] = memcached.get("two_line_element",
+                                                                                            default=dict())
 
     if twoLineElement:
-        key = next(iter(twoLineElement.keys()))
-        timestamp = twoLineElement[key]["updated"]
+        key: str = next(iter(twoLineElement.keys()))
+        timestamp: datetime = twoLineElement[key]["updated"]
     else:
         return readDatabase()
 
@@ -74,7 +74,7 @@ def readMemcache() -> {dict}:
     return twoLineElement
 
 
-def writeDatabase(data):
+def writeDatabase(data) -> None:
     if not appConfig.enableDB:
         return
 
@@ -82,7 +82,7 @@ def writeDatabase(data):
     # value = ",".join([f"(\'{key}\',\'{data[key]['tle1']}\',\'{data[key]['tle2']}\',\'{datetime.now()}\'::timestamp)"
     #                   for key in data.keys() if not "\'" in key])
 
-    data: list = [
+    data: list[tuple[str, str, str, datetime]] = [
         (
             key,
             data[key]['tle1'],
@@ -91,10 +91,11 @@ def writeDatabase(data):
     dbUtils.insertAll("two_line_element", data)
 
 
-def readDatabase() -> {dict}:
+def readDatabase() -> dict[str, dict[str, str | datetime]]:
     if not appConfig.enableDB:
         return writeTwoLineElement()
 
+    timestamp: datetime | None
     timestamp, = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
@@ -104,9 +105,10 @@ def readDatabase() -> {dict}:
         logging.warning("WARNING: db outdated")
         return writeTwoLineElement()
 
-    dbData: dict = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
-    data: dict = dict(zip([twoLineElement['tle0'] for twoLineElement in dbData], [
-                      dict(kv) for kv in dbData]))
+    dbData: None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]] \
+        = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
+    data: dict[str, dict[str, str | datetime]] = dict(zip([twoLineElement['tle0'] for twoLineElement in dbData],
+                                                          [dict(kv) for kv in dbData]))
 
     if data:
         writeMemcache(data)
@@ -116,8 +118,8 @@ def readDatabase() -> {dict}:
     return writeTwoLineElement()
 
 
-def writeTwoLineElement() -> {dict}:
-    data = getTwoLineElement()
+def writeTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+    data: dict[str, dict[str, str | datetime]] = getTwoLineElement()
 
     if appConfig.enableMemcache:
         logging.info("LOGGING: writing to cache")
@@ -132,12 +134,12 @@ def writeTwoLineElement() -> {dict}:
     return data
 
 
-def readTwoLineElement() -> {dict}:
-    data = readMemcache()
+def readTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+    data: dict[str, dict[str, str | datetime]] = readMemcache()
     return data if data else readDatabase()
 
 
-def refreshTwoLineElement() -> {dict}:
+def refreshTwoLineElement() -> dict[str, dict[str, str | datetime]]:
     if appConfig.enableMemcache:
         clearMemcache()
     if appConfig.enableDB:
@@ -147,18 +149,6 @@ def refreshTwoLineElement() -> {dict}:
 
 
 if __name__ == "__main__":
-    # # test reading from memcached -> 0.5 sec
-    # t = time.perf_counter()
-    # twoLineElement = memcached.get("two_line_element")
-    # print(twoLineElement)
-    # print(time.perf_counter() - t)
-    #
-    # # test reading from memcached -> 2 sec
-    # t = time.perf_counter()
-    # twoLineElement = readDatabase()
-    # print(twoLineElement)
-    # print(time.perf_counter() - t)
-
     # clear cache && db
     clearMemcache()
     dbUtils.truncateTable("two_line_element")
