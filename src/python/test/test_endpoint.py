@@ -3,6 +3,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 from ..util.asyncUtil import asyncRequest, asyncRequestAll, aiohttp, asyncio
+from ..service.mockDataService import generateLngLat
 
 # baseUrl for production
 baseUrl = "https://uci-cubesat-server-dev.herokuapp.com/api/v1"
@@ -75,6 +76,25 @@ def testPrediction():
                         data[peak]["set"])
 
     asyncio.run(asyncTestPrediction())
+
+
+# def testPredictionWithMockLngLat():
+#     async def asyncTestPredictionWithMockLngLat():
+#         async with aiohttp.ClientSession() as session:
+#             asyncResponse = await asyncRequestAll(session, [f"{predictionUrl}?satellite={quote(key)}" +
+#                                                             f"&latitude={generateLngLat()['lat']}" +
+#                                                             f"&longitude={generateLngLat()['lng']}" +
+#                                                             f"&duration={3600.0 * 1.0 * 24.0}"
+#                                                             for key in requests.get(availableSatelliteUrl).json()])
+#
+#             for data in asyncResponse:
+#                 assert isinstance(data, dict)
+#                 for peak in data.keys():
+#                     assert isValidIso(peak) and isValidIso(
+#                         data[peak]["rise"]) and isValidIso(
+#                         data[peak]["set"])
+#
+#     asyncio.run(asyncTestPredictionWithMockLngLat())
 
 
 if __name__ == "__main__":
