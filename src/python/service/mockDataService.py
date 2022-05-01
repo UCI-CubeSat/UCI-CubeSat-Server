@@ -34,7 +34,7 @@ def generateLngLat() -> dict[str, fake.pydecimal]:
                 lat=fake.latitude())
 
 
-def generateLocation() -> dict[str, fake.pydecimal | str]:
+def generateLocation() -> dict[str, float | str]:
     """
 
     Returns: any valid {lng: Decimal('13.4134995'),
