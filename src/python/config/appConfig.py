@@ -20,10 +20,10 @@ enableDB = True
 enableMemcache = True  # always False on non-macOS
 
 # flask config setting
-flaskServer = Flask(__name__)
-Talisman(flaskServer, content_security_policy=None)
-CORS(flaskServer)
-flaskWebSocket = SocketIO(flaskServer)
+app = Flask(__name__)
+Talisman(app, content_security_policy=None)
+CORS(app)
+flaskWebSocket = SocketIO(app)
 
 # load secret from .env
 load_dotenv()
@@ -41,8 +41,8 @@ dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
 # dbUrl = os.getenv("DB_URL")
 
 # sqlalchemy db config setting
-flaskServer.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
-flaskServer.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # psycopg db config setting
 _ = psycopg

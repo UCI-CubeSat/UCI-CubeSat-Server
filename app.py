@@ -7,10 +7,10 @@ import time
 
 from src.python.config import appConfig
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
-from src.python.config.appConfig import flaskServer, flaskWebSocket
+from src.python.config.appConfig import app, flaskWebSocket
 
 
-@flaskServer.route(f'/', methods=['GET'])
+@app.route(f'/', methods=['GET'])
 def getHomePage():
     return flask.jsonify({
         "Name": "UCI CubeSat Flask Server",
@@ -25,7 +25,7 @@ def getHomePage():
     })
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
 def getServerStatus():
     satnogsRequest = requests.get(satnogsService.TLE_URL)
     dbRequest: dict = tleService.readTwoLineElement()
@@ -48,14 +48,14 @@ def getServerStatus():
     return response
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
 def getTwoLineElement():
     refresh = request.args.get("refresh", default="false", type=str)
     return flask.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
         else flask.jsonify(tleService.readTwoLineElement())
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/geocoding', methods=['POST'])
+@app.route(f'{appConfig.apiBaseUrl}/geocoding', methods=['POST'])
 def getLatLong():
     addressLine = request.get_json().get('address')
     city = request.get_json().get('city')
@@ -72,12 +72,12 @@ def getLatLong():
             country)[0])
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/available_satellite', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/available_satellite', methods=['GET'])
 def getAvailableSatellite():
     return flask.jsonify(list(tleService.readTwoLineElement().keys()))
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
 def getSatelliteState():
     name = request.args.get("name", default="AmicalSat", type=str).upper()
     duration = request.args.get("duration", default=3600.0, type=float)
@@ -102,7 +102,7 @@ def getSatelliteState():
                           })
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/prediction', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/prediction', methods=['GET'])
 def getHorizon():
     satellite = urllib.parse.unquote(
         request.args.get(
@@ -125,13 +125,13 @@ def getHorizon():
             latitude, longitude, elevation_m=elevation)))
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/emailSignup', methods=['POST'])
+@app.route(f'{appConfig.apiBaseUrl}/emailSignup', methods=['POST'])
 def addEmailSubscriber():
     # TODO: integrate with React.js frontend /src/components/emailSignup.js
     pass
 
 
-@flaskServer.route(f'{appConfig.apiBaseUrl}/serverMetric', methods=['GET'])
+@app.route(f'{appConfig.apiBaseUrl}/serverMetric', methods=['GET'])
 def serverMetric():
     duration = request.args.get("duration", default=3600.0 * 24, type=float)
 
@@ -158,4 +158,4 @@ def serverMetric():
 
 
 if __name__ == '__main__':
-    flaskWebSocket.run(flaskServer)
+    flaskWebSocket.run(app)
