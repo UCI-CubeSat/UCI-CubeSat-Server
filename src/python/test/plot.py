@@ -5,7 +5,7 @@ import matplotlib
 from matplotlib import pyplot, animation
 from matplotlib.animation import FuncAnimation
 from skyfield.toposlib import wgs84
-import numpy as np
+import numpy
 
 from src.python.service import skyfieldService, tleService
 
@@ -119,7 +119,7 @@ def plotRealTime():
 
     # move the point position at every frame
     def update_point(n, x, y, point):
-        point.set_data(np.array([x[n], y[n]]))
+        point.set_data(numpy.array([x[n], y[n]]))
         return point
 
     return animation.FuncAnimation(fig, update_point, 99, fargs=(x, y, point))
@@ -128,6 +128,8 @@ def plotRealTime():
 if __name__ == "__main__":
     # flight path of every available satellite
     _ = plotPath()
+
+    pyplot.show()
 
     # for every available satellite, an animation of its flight path
     _ = plotRealTime()
