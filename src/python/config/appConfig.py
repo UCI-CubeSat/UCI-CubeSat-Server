@@ -8,7 +8,6 @@ from flask_cors import CORS
 from flask_talisman import Talisman
 import psycopg
 import bmemcached
-
 # import logging
 
 # logging config setting
@@ -16,18 +15,23 @@ import bmemcached
 # logOverwrite = 'w'
 # logging.basicConfig(filename='error.log', encoding='utf-8', level=logLevel)
 
+# load secret from .env
+load_dotenv()
+
 # db/memcache config setting
 enableDB: bool = True
 enableMemcache: bool = True  # always False on non-macOS
 
 # flask config setting
+flaskHost: str | None = os.getenv("FLASK_HOST") if os.getenv("FLASK_HOST") else None
+flaskPort: str | None = os.getenv("FLASK_PORT") if os.getenv("FLASK_PORT") else None
+flaskEnv: str | None = os.getenv("FLASK_ENV") if os.getenv("FLASK_ENV") else "development"
+flaskDebug: bool = True if flaskEnv == "development" else False
+
 app: Flask = Flask(__name__)
 Talisman(app, content_security_policy=None)
 CORS(app)
 flaskWebSocket: SocketIO = SocketIO(app)
-
-# load secret from .env
-load_dotenv()
 
 # Heroku Memcached
 memcached: ReplicatingClient = bmemcached.Client(os.environ.get('MEMCACHEDCLOUD_SERVERS').split(','),

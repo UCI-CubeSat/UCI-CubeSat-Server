@@ -1,4 +1,0 @@
-FLASK_DEBUG=1
-FLASK_APP=app.py
-FLASK_ENV=development
-JSON_SORT_KEYS=1

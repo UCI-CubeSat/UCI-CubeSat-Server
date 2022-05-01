@@ -7,7 +7,7 @@ import time
 
 from src.python.config import appConfig
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
-from src.python.config.appConfig import app, flaskWebSocket
+from src.python.config.appConfig import app, flaskWebSocket, flaskDebug
 
 
 @app.route(f'/', methods=['GET'])
@@ -158,4 +158,4 @@ def serverMetric():
 
 
 if __name__ == '__main__':
-    flaskWebSocket.run(app)
+    flaskWebSocket.run(app, debug=flaskDebug)
