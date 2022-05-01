@@ -5,6 +5,7 @@ b. postgre Database
 c. memcached
 """
 import logging
+import time
 from datetime import datetime
 
 from src.python.database import dbUtils
@@ -46,24 +47,22 @@ def writeMemcache(data: dict):
     if not appConfig.enableMemcache:
         return
 
-    keySet: list = list(data.keys())
-    memcached.set("keySet", keySet)
-
-    for key in keySet:
-        memcached.set(key, dict(tle0=key,
-                                tle1=data[key]['tle1'],
-                                tle2=data[key]['tle2'],
-                                updated=datetime.now()))
+    memcached.set("two_line_element",
+                  {key: dict(tle0=key,
+                             tle1=data[key]['tle1'],
+                             tle2=data[key]['tle2'],
+                             updated=datetime.now()) for key in data.keys()})
 
 
 def readMemcache() -> {dict}:
     if not appConfig.enableMemcache:
         return None
 
-    keySet: list = memcached.get("keySet", default=[])
+    twoLineElement: dict = memcached.get("two_line_element", default=dict())
 
-    if keySet:
-        timestamp = memcached.get(keySet[0])["updated"]
+    if twoLineElement:
+        key = next(iter(twoLineElement.keys()))
+        timestamp = twoLineElement[key]["updated"]
     else:
         return readDatabase()
 
@@ -72,7 +71,7 @@ def readMemcache() -> {dict}:
         return readDatabase()
 
     logging.warning("INFO: reading from mc")
-    return {key: memcached.get(key) for key in keySet}
+    return twoLineElement
 
 
 def writeDatabase(data):
@@ -148,9 +147,21 @@ def refreshTwoLineElement() -> {dict}:
 
 
 if __name__ == "__main__":
+    # # test reading from memcached -> 0.5 sec
+    # t = time.perf_counter()
+    # twoLineElement = memcached.get("two_line_element")
+    # print(twoLineElement)
+    # print(time.perf_counter() - t)
+    #
+    # # test reading from memcached -> 2 sec
+    # t = time.perf_counter()
+    # twoLineElement = readDatabase()
+    # print(twoLineElement)
+    # print(time.perf_counter() - t)
+
     # clear cache && db
     clearMemcache()
-    # dbUtils.truncateTable("two_line_element")
+    dbUtils.truncateTable("two_line_element")
     # change setting
     appConfig.enableDB = True
     appConfig.enableMemcache = True
