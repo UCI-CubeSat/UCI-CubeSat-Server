@@ -161,14 +161,21 @@ def serverMetric():
 
 
 # flask webSocket routes
-@flaskWebSocket.on('message')
-def handle_message(data):
-    print('received message: ' + data)
+@flaskWebSocket.on("message")
+def handle_message(message: str):
+    print("message from client: " + message)
+    try:
+        result = eval(message)
+        print(f"eval expression: {result}")
+        flaskWebSocket.emit("response", f"{result}")
+    except Exception:
+        print(f"invalid expression")
+        flaskWebSocket.emit("response", f"invalid expression")
 
 
 @flaskWebSocket.on('connect')
 def handle_connect():
-    print('connection established')
+    print('connection established with client')
 
 
 if __name__ == '__main__':
