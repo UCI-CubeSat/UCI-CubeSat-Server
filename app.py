@@ -12,6 +12,7 @@ from src.python.service import bingMapService, skyfieldService, satnogsService, 
 from src.python.config.appConfig import app, flaskWebSocket, flaskDebug
 
 
+# flask server routes
 @app.route(f'/', methods=['GET'])
 def getHomePage():
     return flask.jsonify({
@@ -157,6 +158,17 @@ def serverMetric():
             "Number of Satellite:": len(keySet)
         }
     })
+
+
+# flask webSocket routes
+@flaskWebSocket.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+
+
+@flaskWebSocket.on('connect')
+def handle_connect():
+    print('connection established')
 
 
 if __name__ == '__main__':
