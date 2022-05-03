@@ -2,12 +2,14 @@ import urllib
 import os
 from bmemcached import ReplicatingClient
 from dotenv import load_dotenv
+import socketio
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_talisman import Talisman
 import psycopg
 import bmemcached
+
 # import logging
 
 # logging config setting
@@ -33,6 +35,13 @@ Talisman(app, content_security_policy=None)
 CORS(app)
 flaskWebSocket: SocketIO = SocketIO(app)
 
+# socketIO config
+socketIO = socketio.Client()
+webSocketUrl = "http://127.0.0.1:5001" \
+    if flaskEnv == "development" \
+    else "https://uci-cubesat-websocket-server.herokuapp.com/"
+webSocketConnected: bool = False
+
 # Heroku Memcached
 memcached: ReplicatingClient = bmemcached.Client(os.environ.get('MEMCACHEDCLOUD_SERVERS').split(','),
                                                  os.environ.get('MEMCACHEDCLOUD_USERNAME'),
@@ -55,11 +64,11 @@ urllib.parse.uses_netloc.append("postgres")
 url: object = urllib.parse.urlparse(dbUrl)
 dbCredential: str | None = dbUrl
 psycopg2Config: dict[str, str | object] = dict(database=url.path[1:],
-                                            user=url.username,
-                                            password=url.password,
-                                            host=url.hostname,
-                                            port=url.port,
-                                            options='-c statement_timeout=10000')
+                                               user=url.username,
+                                               password=url.password,
+                                               host=url.hostname,
+                                               port=url.port,
+                                               options='-c statement_timeout=10000')
 
 # API URL config
 satnogsApiKey: str | None = os.getenv('SATNOGS_MAP_API_KEY')
