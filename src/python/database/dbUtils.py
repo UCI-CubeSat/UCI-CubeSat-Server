@@ -66,6 +66,33 @@ def fetchAll(queryName: str,
             dbConnection.close()
 
 
+async def asyncFetchAll(queryName: str,
+                        *args: object,
+                        **kwargs: object) -> None | tuple[str, str, str, datetime] | list[tuple[str,
+                                                                                                str, str, datetime]]:
+    if 'dict' in kwargs.keys() and kwargs['dict']:
+        config: dict[str, object] = connectionConfigRowFactory
+    else:
+        config: dict[str, object] = connectionConfig
+    async with await psycopg.AsyncConnection.connect(**config) as dbConnection:
+        try:
+            async with dbConnection.cursor() as dbCursor:
+                if args:
+                    await dbCursor.execute(dbQueries.queries[queryName](args))
+                else:
+                    await dbCursor.execute(dbQueries.queries[queryName]())
+
+                dbResponse: list[tuple[str, str, str, datetime]] = await dbCursor.fetchall()
+                return None if len(dbResponse) == 0 else dbResponse[0] if len(
+                    dbResponse) == 1 else dbResponse
+
+        except psycopg.errors.Error:
+            dbConnection.close()
+        except Exception as asyncError:
+            _ = asyncError
+            dbConnection.close()
+
+
 def dropTable(tableName: str) -> None:
     with psycopg.connect(**connectionConfig) as dbConnection:
         try:
