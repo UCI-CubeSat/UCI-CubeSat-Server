@@ -1,37 +1,38 @@
 import logging
 from datetime import datetime
-import flask
-from flask import request, Response, Blueprint
+import quart
+from quart import request, Response, Blueprint
 from requests import Response
 from skyfield.toposlib import wgs84
 import urllib
 import time
 import aiohttp
 
-from src.python.config import appConfig
+from src.python.config.appConfig import apiBaseUrl
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
 from src.python.util.asyncUtil import asyncRequest
+
 
 serverRoute: Blueprint = Blueprint('server', __name__)
 
 
 @serverRoute.route(f'/', methods=['GET'])
 def getIndex():
-    return flask.jsonify({
+    return quart.jsonify({
         "Name": "UCI CubeSat Flask Server",
         "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
         "Endpoint": {"GET": [
-            f"{flask.request.host_url}api/v1/heartbeat",
-            f"{flask.request.host_url}api/v1/tle",
-            f"{flask.request.host_url}api/v1/states",
-            f"{flask.request.host_url}api/v1/prediction",
-            f"{flask.request.host_url}api/v1/available_satellite",
-            f"{flask.request.host_url}api/v1/ws_message?message=2**3",
+            f"{quart.request.host_url}api/v1/heartbeat",
+            f"{quart.request.host_url}api/v1/tle",
+            f"{quart.request.host_url}api/v1/states",
+            f"{quart.request.host_url}api/v1/prediction",
+            f"{quart.request.host_url}api/v1/available_satellite",
+            f"{quart.request.host_url}api/v1/ws_message?message=2**3",
         ]}
     })
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
+@serverRoute.route(f'{apiBaseUrl}/heartbeat', methods=['GET'])
 async def getServerStatus():
     try:
         async with aiohttp.ClientSession() as session:
@@ -41,7 +42,7 @@ async def getServerStatus():
         logging.WARNING(f"{asyncError}")
     dbRequest: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
     try:
-        response: Response = flask.jsonify({
+        response: Response = quart.jsonify({
             "status": "online",
             "satnogs": {
                 "status": "online" if data else "offline"
@@ -53,28 +54,28 @@ async def getServerStatus():
             }
         })
     except Exception as error:
-        response = flask.jsonify(
+        response = quart.jsonify(
             {"status": str(f"{str(type(error))}: {error}")})
 
     return response
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/tle', methods=['GET'])
-def getTwoLineElement():
+@serverRoute.route(f'{apiBaseUrl}/tle', methods=['GET'])
+async def getTwoLineElement():
     refresh: str = request.args.get("refresh", default="false", type=str)
-    return flask.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
-        else flask.jsonify(tleService.readTwoLineElement())
+    return quart.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
+        else quart.jsonify(tleService.readTwoLineElement())
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/geocoding', methods=['POST'])
-def getLatLong():
+@serverRoute.route(f'{apiBaseUrl}/geocoding', methods=['POST'])
+async def getLatLong():
     addressLine = request.get_json().get('address')
     city = request.get_json().get('city')
     postalCode = request.get_json().get('postalCode')
     country = request.get_json().get('country')
     adminDistrict = request.get_json().get('adminDistrict')
 
-    return flask.jsonify(
+    return quart.jsonify(
         bingMapService.getLatLong(
             addressLine,
             city,
@@ -83,13 +84,13 @@ def getLatLong():
             country)[0])
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/available_satellite', methods=['GET'])
-def getAvailableSatellite():
-    return flask.jsonify(list(tleService.readTwoLineElement().keys()))
+@serverRoute.route(f'{apiBaseUrl}/available_satellite', methods=['GET'])
+async def getAvailableSatellite():
+    return quart.jsonify(list(tleService.readTwoLineElement().keys()))
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/states', methods=['GET'])
-def getSatelliteState():
+@serverRoute.route(f'{apiBaseUrl}/states', methods=['GET'])
+async def getSatelliteState():
     name: str = request.args.get("name", default="AmicalSat", type=str).upper()
     duration: float = request.args.get("duration", default=3600.0, type=float)
     data: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
@@ -98,7 +99,7 @@ def getSatelliteState():
         satellite_tle: dict[str, str | datetime] = data[name] if name in data.keys(
         ) else data[f'0 {name}']
     except KeyError:
-        return flask.jsonify({})
+        return quart.jsonify({})
 
     response: dict[str, object] = skyfieldService.getSphericalPath(
         satellite_tle, duration, 60.0 / 60.0)
@@ -106,15 +107,15 @@ def getSatelliteState():
     currLatPath: list[float] = response["latArray"]
     currLngPath: list[float] = response["lngArray"]
     currLatLngPath: list[tuple[float, float]] = response["latLngArray"]
-    return flask.jsonify({"latLng": {"lat": currLatLng[0], "lng": currLatLng[1]},
+    return quart.jsonify({"latLng": {"lat": currLatLng[0], "lng": currLatLng[1]},
                           "latPath": list(currLatPath),
                           "lngPath": list(currLngPath),
                           "latLngPath": currLatLngPath
                           })
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/prediction', methods=['GET'])
-def getHorizon():
+@serverRoute.route(f'{apiBaseUrl}/prediction', methods=['GET'])
+async def getHorizon():
     satellite: str = urllib.parse.unquote(
         request.args.get(
             "satellite",
@@ -129,21 +130,21 @@ def getHorizon():
         type=float)
 
     if satellite == "" or not (longitude and longitude):
-        return flask.jsonify({})
+        return quart.jsonify({})
 
-    return flask.jsonify(skyfieldService.findHorizonTime(
+    return quart.jsonify(skyfieldService.findHorizonTime(
         tleService.readTwoLineElement()[satellite], duration, wgs84.latlon(
             latitude, longitude, elevation_m=elevation)))
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/emailSignup', methods=['POST'])
-def postEmailSubscriber():
+@serverRoute.route(f'{apiBaseUrl}/emailSignup', methods=['POST'])
+async def postEmailSubscriber():
     # TODO: integrate with React.js frontend /src/components/emailSignup.js
     pass
 
 
-@serverRoute.route(f'{appConfig.apiBaseUrl}/serverMetric', methods=['GET'])
-def getServerMetric():
+@serverRoute.route(f'{apiBaseUrl}/serverMetric', methods=['GET'])
+async def getServerMetric():
     duration: float = request.args.get("duration", default=3600.0 * 24, type=float)
 
     t: float = time.perf_counter()
@@ -158,7 +159,7 @@ def getServerMetric():
 
     calculationTime: float = time.perf_counter() - t
 
-    return flask.jsonify({
+    return quart.jsonify({
         "Initial Load Cost:": initialLoadTime,
         "Prediction Calculation Cost:": calculationTime,
         "Prediction Calculation Size:": {

@@ -2,11 +2,9 @@ import urllib
 import os
 from bmemcached import ReplicatingClient
 from dotenv import load_dotenv
-import socketio
-from flask import Flask
-from flask_socketio import SocketIO
-from flask_cors import CORS
-from flask_talisman import Talisman
+from quart import Quart
+from quart_cors import cors
+from quart import websocket
 import psycopg
 import bmemcached
 
@@ -25,22 +23,17 @@ enableDB: bool = True
 enableMemcache: bool = True  # always False on non-macOS
 
 # flask config setting
-flaskHost: str | None = os.getenv("FLASK_HOST") if os.getenv("FLASK_HOST") else None
-flaskPort: str | None = os.getenv("FLASK_PORT") if os.getenv("FLASK_PORT") else None
-flaskEnv: str | None = os.getenv("FLASK_ENV") if os.getenv("FLASK_ENV") else "development"
-flaskDebug: bool = True if flaskEnv == "development" else False
+quartHost: str | None = os.getenv("QUART_HOST") if os.getenv("QUART_HOST") else None
+quartPort: str | None = os.getenv("QUART_PORT") if os.getenv("QUART_PORT") else None
+quartEnv: str | None = os.getenv("QUART_ENV") if os.getenv("QUART_ENV") else "development"
+quartDebug: bool = True if quartEnv == "development" else False
 
-app: Flask = Flask(__name__)
-Talisman(app, content_security_policy=None)
-CORS(app)
-flaskWebSocket: SocketIO = SocketIO(app)
+app: Quart = Quart(__name__)
+cors(app)
 
 # socketIO config
-socketIO = socketio.Client()
-# webSocketUrl = "http://127.0.0.1:5001" \
-#     if flaskEnv == "development" \
-#     else "https://uci-cubesat-websocket-server.herokuapp.com/"
-webSocketUrl = "https://uci-cubesat-websocket-server.herokuapp.com/"
+webSocketUrl = "https://uci-cubesat-websocket-server.herokuapp.com/" if quartEnv == "development" \
+    else "https://uci-cubesat-websocket-server.herokuapp.com/"
 webSocketConnected: bool = False
 
 # Heroku Memcached
