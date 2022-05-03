@@ -67,10 +67,10 @@ def readMemcache() -> dict[str, dict[str, str | datetime]]:
         return readDatabase()
 
     if not isRecent(timestamp):
-        logging.warning("WARNING: mc outdated")
+        logging.warning("WARNING: twoLineElement in memcached is outdated")
         return readDatabase()
 
-    logging.warning("INFO: reading from mc")
+    logging.info("INFO: fetching twoLineElement from memcached")
     return twoLineElement
 
 
@@ -102,7 +102,7 @@ def readDatabase() -> dict[str, dict[str, str | datetime]]:
         return writeTwoLineElement()
 
     if not isRecent(timestamp):
-        logging.warning("WARNING: db outdated")
+        logging.warning("WARNING: twoLineElement in heroku postgre database is outdated")
         return writeTwoLineElement()
 
     dbData: None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]] \
@@ -112,7 +112,7 @@ def readDatabase() -> dict[str, dict[str, str | datetime]]:
 
     if data:
         writeMemcache(data)
-        logging.warning("INFO: reading from db")
+        logging.info("INFO: fetching twoLineElement from heroku postgre database")
         return data
 
     return writeTwoLineElement()
@@ -122,14 +122,12 @@ def writeTwoLineElement() -> dict[str, dict[str, str | datetime]]:
     data: dict[str, dict[str, str | datetime]] = getTwoLineElement()
 
     if appConfig.enableMemcache:
-        logging.info("LOGGING: writing to cache")
+        logging.info("INFO: writing to memcached")
         writeMemcache(data)
-        logging.info("LOGGING: done writing to cache")
 
     if appConfig.enableDB:
-        logging.info("LOGGING: writing to db")
+        logging.info("INFO: writing to heroku postgre database")
         writeDatabase(data)
-        logging.info("LOGGING: done writing to db")
 
     return data
 
