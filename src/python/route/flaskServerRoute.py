@@ -1,15 +1,16 @@
+import logging
 from datetime import datetime
 import flask
-import requests
 from flask import request, Response, Blueprint
 from requests import Response
 from skyfield.toposlib import wgs84
 import urllib
 import time
+import aiohttp
 
 from src.python.config import appConfig
 from src.python.service import bingMapService, skyfieldService, satnogsService, tleService
-
+from src.python.util.asyncUtil import asyncRequest
 
 serverRoute: Blueprint = Blueprint('server', __name__)
 
@@ -31,14 +32,19 @@ def getIndex():
 
 
 @serverRoute.route(f'{appConfig.apiBaseUrl}/heartbeat', methods=['GET'])
-def getServerStatus():
-    satnogsRequest: Response = requests.get(satnogsService.TLE_URL)
+async def getServerStatus():
+    try:
+        async with aiohttp.ClientSession() as session:
+            data: dict[str, dict[str, str | datetime]] = await asyncRequest(session, satnogsService.TLE_URL)
+    except Exception as asyncError:
+        data = dict()
+        logging.WARNING(f"{asyncError}")
     dbRequest: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
     try:
         response: Response = flask.jsonify({
             "status": "online",
             "satnogs": {
-                "status": "online" if satnogsRequest.status_code == 200 else "offline"
+                "status": "online" if data else "offline"
             },
             "database": {
                 "status": "online" if len(dbRequest) != 0 else "offline",

@@ -3,6 +3,7 @@ asyncio==3.4.3
 DateTime==4.4
 Faker==13.4.0
 Flask==2.1.1
+Flask[async]
 Flask-Cors==3.0.10
 Flask-SocketIO==5.1.2
 Flask-SQLAlchemy==2.5.1
