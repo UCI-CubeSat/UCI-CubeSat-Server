@@ -37,9 +37,10 @@ flaskWebSocket: SocketIO = SocketIO(app)
 
 # socketIO config
 socketIO = socketio.Client()
-webSocketUrl = "http://127.0.0.1:5001" \
-    if flaskEnv == "development" \
-    else "https://uci-cubesat-websocket-server.herokuapp.com/"
+# webSocketUrl = "http://127.0.0.1:5001" \
+#     if flaskEnv == "development" \
+#     else "https://uci-cubesat-websocket-server.herokuapp.com/"
+webSocketUrl = "https://uci-cubesat-websocket-server.herokuapp.com/ "
 webSocketConnected: bool = False
 
 # Heroku Memcached

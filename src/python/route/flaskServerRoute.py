@@ -25,7 +25,7 @@ def getIndex():
             f"{flask.request.host_url}api/v1/states",
             f"{flask.request.host_url}api/v1/prediction",
             f"{flask.request.host_url}api/v1/available_satellite",
-            f"{flask.request.host_url}api/v1/websocket",
+            f"{flask.request.host_url}api/v1/ws_message?message=2**3",
         ]}
     })
 
