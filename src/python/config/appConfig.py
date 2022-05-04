@@ -2,66 +2,60 @@ import urllib
 import os
 from bmemcached import ReplicatingClient
 from dotenv import load_dotenv
-from flask import Flask
-from flask_socketio import SocketIO
-from flask_cors import CORS
-from flask_talisman import Talisman
+from quart import Quart
+from quart_cors import cors
 import psycopg
 import bmemcached
-# import logging
 
-# logging config setting
-# logLevel = logging.ERROR
-# logOverwrite = 'w'
-# logging.basicConfig(filename='error.log', encoding='utf-8', level=logLevel)
-
-# load secret from .env
 load_dotenv()
 
-# db/memcache config setting
+# Database & Memcached feature flag
 enableDB: bool = True
 enableMemcache: bool = True  # always False on non-macOS
 
-# flask config setting
-flaskHost: str | None = os.getenv("FLASK_HOST") if os.getenv("FLASK_HOST") else None
-flaskPort: str | None = os.getenv("FLASK_PORT") if os.getenv("FLASK_PORT") else None
-flaskEnv: str | None = os.getenv("FLASK_ENV") if os.getenv("FLASK_ENV") else "development"
-flaskDebug: bool = True if flaskEnv == "development" else False
+# Quart env config setting
+quartHost: str | None = os.getenv("QUART_HOST") if os.getenv("QUART_HOST") else "127.0.0.1"
+quartPort: str | None = os.getenv("QUART_PORT") if os.getenv("QUART_PORT") else 5001
+quartEnv: str | None = os.getenv("QUART_ENV") if os.getenv("QUART_ENV") else "development"
+quartDebug: bool = True if quartEnv == "development" else False
 
-app: Flask = Flask(__name__)
-Talisman(app, content_security_policy=None)
-CORS(app)
-flaskWebSocket: SocketIO = SocketIO(app)
+app: Quart = Quart(__name__)
+cors(app)
 
-# Heroku Memcached
+# WebSocket config
+webSocketUrl: str = "https://uci-cubesat-websocket-server.herokuapp.com/" if quartEnv == "development" \
+    else "https://uci-cubesat-websocket-server.herokuapp.com/"
+webSocketConnected: bool = False
+
+# Heroku Memcached config
 memcached: ReplicatingClient = bmemcached.Client(os.environ.get('MEMCACHEDCLOUD_SERVERS').split(','),
                                                  os.environ.get('MEMCACHEDCLOUD_USERNAME'),
                                                  os.environ.get('MEMCACHEDCLOUD_PASSWORD'))
 
-# Heroku Postgre
+# Heroku Postgre config
 dbUrl: str | None = os.getenv("DATABASE_URL")
 dbUrl = "postgresql" + dbUrl[dbUrl.index(":"):]
 
-# Elephant Postgre
+# Elephant Postgre config
 # dbUrl = os.getenv("DB_URL")
 
-# sqlalchemy db config setting
+# Quart sqlalchemy config
 app.config["SQLALCHEMY_DATABASE_URI"] = dbUrl
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# psycopg db config setting
+# Psycopg config
 _ = psycopg
 urllib.parse.uses_netloc.append("postgres")
 url: object = urllib.parse.urlparse(dbUrl)
 dbCredential: str | None = dbUrl
 psycopg2Config: dict[str, str | object] = dict(database=url.path[1:],
-                                            user=url.username,
-                                            password=url.password,
-                                            host=url.hostname,
-                                            port=url.port,
-                                            options='-c statement_timeout=10000')
+                                               user=url.username,
+                                               password=url.password,
+                                               host=url.hostname,
+                                               port=url.port,
+                                               options='-c statement_timeout=10000')
 
-# API URL config
+# Endpoint Url config
 satnogsApiKey: str | None = os.getenv('SATNOGS_MAP_API_KEY')
 apiVersion: str = "v1"
 apiBaseUrl: str = f"/api/{apiVersion}"
