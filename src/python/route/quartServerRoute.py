@@ -17,9 +17,9 @@ serverRoute: Blueprint = Blueprint('server', __name__)
 
 
 @serverRoute.route(f'/', methods=['GET'])
-def getIndex():
+async def getIndex():
     return quart.jsonify({
-        "Name": "UCI CubeSat Flask Server",
+        "Name": "UCI CubeSat Backend Server",
         "Github": "https://github.com/UCI-CubeSat/UCI-CubeSat-Server",
         "Endpoint": {"GET": [
             f"{quart.request.host_url}api/v1/heartbeat",
@@ -27,7 +27,7 @@ def getIndex():
             f"{quart.request.host_url}api/v1/states",
             f"{quart.request.host_url}api/v1/prediction",
             f"{quart.request.host_url}api/v1/available_satellite",
-            f"{quart.request.host_url}api/v1/ws_message?message=2**3",
+            f"{quart.request.host_url}api/v1/ws_message?message=HELLO",
         ]}
     })
 
@@ -40,7 +40,7 @@ async def getServerStatus():
     except Exception as asyncError:
         data = dict()
         logging.WARNING(f"{asyncError}")
-    dbRequest: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
+    dbRequest: dict[str, dict[str, str | datetime]] = await tleService.readTwoLineElement()
     try:
         response: Response = quart.jsonify({
             "status": "online",
@@ -63,8 +63,8 @@ async def getServerStatus():
 @serverRoute.route(f'{apiBaseUrl}/tle', methods=['GET'])
 async def getTwoLineElement():
     refresh: str = request.args.get("refresh", default="false", type=str)
-    return quart.jsonify(tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
-        else quart.jsonify(tleService.readTwoLineElement())
+    return quart.jsonify(await tleService.refreshTwoLineElement()) if refresh.lower() == "true" \
+        else quart.jsonify(await tleService.readTwoLineElement())
 
 
 @serverRoute.route(f'{apiBaseUrl}/geocoding', methods=['POST'])
@@ -86,14 +86,14 @@ async def getLatLong():
 
 @serverRoute.route(f'{apiBaseUrl}/available_satellite', methods=['GET'])
 async def getAvailableSatellite():
-    return quart.jsonify(list(tleService.readTwoLineElement().keys()))
+    return quart.jsonify(list((await tleService.readTwoLineElement()).keys()))
 
 
 @serverRoute.route(f'{apiBaseUrl}/states', methods=['GET'])
 async def getSatelliteState():
     name: str = request.args.get("name", default="AmicalSat", type=str).upper()
     duration: float = request.args.get("duration", default=3600.0, type=float)
-    data: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
+    data: dict[str, dict[str, str | datetime]] = await tleService.readTwoLineElement()
 
     try:
         satellite_tle: dict[str, str | datetime] = data[name] if name in data.keys(
@@ -133,7 +133,7 @@ async def getHorizon():
         return quart.jsonify({})
 
     return quart.jsonify(skyfieldService.findHorizonTime(
-        tleService.readTwoLineElement()[satellite], duration, wgs84.latlon(
+        (await tleService.readTwoLineElement())[satellite], duration, wgs84.latlon(
             latitude, longitude, elevation_m=elevation)))
 
 
@@ -148,7 +148,7 @@ async def getServerMetric():
     duration: float = request.args.get("duration", default=3600.0 * 24, type=float)
 
     t: float = time.perf_counter()
-    kvSet: dict[str, dict[str, str | datetime]] = tleService.readTwoLineElement()
+    kvSet: dict[str, dict[str, str | datetime]] = await tleService.readTwoLineElement()
     initialLoadTime: float = time.perf_counter() - t
     keySet: list = kvSet.keys()
     t = time.perf_counter()

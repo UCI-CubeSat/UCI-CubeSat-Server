@@ -4,8 +4,10 @@ a. satnog API
 b. postgre Database
 c. memcached
 """
+import asyncio
 import logging
 from datetime import datetime
+from typing import Dict
 
 from src.python.database import dbUtils
 from src.python.config import appConfig
@@ -53,7 +55,7 @@ def writeMemcache(data: dict) -> None:
                              updated=datetime.now()) for key in data.keys()})
 
 
-def readMemcache() -> dict[str, dict[str, str | datetime]]:
+async def readMemcache() -> dict[str, dict[str, str | datetime]]:
     if not appConfig.enableMemcache:
         return None
 
@@ -64,17 +66,17 @@ def readMemcache() -> dict[str, dict[str, str | datetime]]:
         key: str = next(iter(twoLineElement.keys()))
         timestamp: datetime = twoLineElement[key]["updated"]
     else:
-        return readDatabase()
+        return await readDatabase()
 
     if not isRecent(timestamp):
         logging.warning("WARNING: twoLineElement in memcached is outdated")
-        return readDatabase()
+        return await readDatabase()
 
     logging.info("INFO: fetching twoLineElement from memcached")
     return twoLineElement
 
 
-def writeDatabase(data) -> None:
+async def writeDatabase(data) -> None:
     if not appConfig.enableDB:
         return
 
@@ -88,25 +90,25 @@ def writeDatabase(data) -> None:
             data[key]['tle1'],
             data[key]['tle2'],
             datetime.now()) for key in data.keys()]
-    dbUtils.insertAll("two_line_element", data)
+    await dbUtils.asyncInsertAll("two_line_element", data)
 
 
-def readDatabase() -> dict[str, dict[str, str | datetime]]:
+async def readDatabase() -> dict[str, dict[str, str | datetime]]:
     if not appConfig.enableDB:
-        return writeTwoLineElement()
+        return await writeTwoLineElement()
 
     timestamp: datetime | None
     timestamp, = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
-        return writeTwoLineElement()
+        return await writeTwoLineElement()
 
     if not isRecent(timestamp):
         logging.warning("WARNING: twoLineElement in heroku postgre database is outdated")
-        return writeTwoLineElement()
+        return await writeTwoLineElement()
 
     dbData: None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]] \
-        = dbUtils.fetchAll("getTwoLineElementAll", dict=True)
+        = await dbUtils.asyncFetchAll("getTwoLineElementAll", dict=True)
     data: dict[str, dict[str, str | datetime]] = dict(zip([twoLineElement['tle0'] for twoLineElement in dbData],
                                                           [dict(kv) for kv in dbData]))
 
@@ -115,10 +117,10 @@ def readDatabase() -> dict[str, dict[str, str | datetime]]:
         logging.info("INFO: fetching twoLineElement from heroku postgre database")
         return data
 
-    return writeTwoLineElement()
+    return await writeTwoLineElement()
 
 
-def writeTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+async def writeTwoLineElement() -> dict[str, dict[str, str | datetime]]:
     data: dict[str, dict[str, str | datetime]] = getTwoLineElement()
 
     if appConfig.enableMemcache:
@@ -127,33 +129,39 @@ def writeTwoLineElement() -> dict[str, dict[str, str | datetime]]:
 
     if appConfig.enableDB:
         logging.info("INFO: writing to heroku postgre database")
-        writeDatabase(data)
+        await writeDatabase(data)
 
     return data
 
 
-def readTwoLineElement() -> dict[str, dict[str, str | datetime]]:
-    data: dict[str, dict[str, str | datetime]] = readMemcache()
-    return data if data else readDatabase()
+async def readTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+    data: dict[str, dict[str, str | datetime]] = await readMemcache()
+    return data if data else await readDatabase()
 
 
-def refreshTwoLineElement() -> dict[str, dict[str, str | datetime]]:
+async def refreshTwoLineElement() -> dict[str, dict[str, str | datetime]]:
     if appConfig.enableMemcache:
         clearMemcache()
     if appConfig.enableDB:
         dbUtils.truncateTable("two_line_element")
 
-    return readTwoLineElement()
+    return await readTwoLineElement()
 
 
 if __name__ == "__main__":
-    # clear cache && db
-    clearMemcache()
-    dbUtils.truncateTable("two_line_element")
-    # change setting
-    appConfig.enableDB = True
-    appConfig.enableMemcache = True
-    # test db clear/read/write
-    for _ in range(3):
-        tle = readTwoLineElement()
-        print(tle, len(tle))
+    async def runDatabaseFetch() -> None:
+        print(await dbUtils.asyncFetchAll("getTwoLineElementAll", dict=True))
+
+    async def runCoroutine() -> None:
+        # clear cache && db
+        clearMemcache()
+        dbUtils.truncateTable("two_line_element")
+        # change setting
+        appConfig.enableDB = True
+        appConfig.enableMemcache = True
+        # test clear/read/write
+        for _ in range(3):
+            tle: dict[str, dict[str, str | datetime]] = await readTwoLineElement()
+            print(tle, "\n", len(tle))
+
+    asyncio.run(runCoroutine())

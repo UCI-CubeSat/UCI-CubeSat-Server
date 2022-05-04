@@ -43,7 +43,7 @@ async def asyncInsertAll(tableName: str, entryArray: list[tuple[str, str, str, d
                     "(%s,%s,%s,%s)",
                     entry).decode("utf-8") for entry in entryArray)
 
-    async with await psycopg.connect(**connectionConfig) as dbConnection:
+    async with await psycopg.AsyncConnection.connect(conninfo=dbCredential) as dbConnection:
         try:
             async with dbConnection.cursor() as dbCursor:
                 query: str = f"INSERT INTO {tableName} VALUES {value}"
