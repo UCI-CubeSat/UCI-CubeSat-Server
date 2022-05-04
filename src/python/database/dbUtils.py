@@ -17,17 +17,39 @@ connectionConfigRowFactory = dict(
 def insertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) -> None:
     truncateTable(tableName)
 
-    with psycopg2.connect(**psycopg2Config) as dbConnection:
+    with psycopg2.connect(**psycopg2Config) as tempConnection:
+        with tempConnection.cursor() as tempCursor:
+            value: str = ','.join(
+                tempCursor.mogrify(
+                    "(%s,%s,%s,%s)",
+                    entry).decode("utf-8") for entry in entryArray)
+
+    with psycopg.connect(**connectionConfig) as dbConnection:
         try:
             with dbConnection.cursor() as dbCursor:
-                value: str = ','.join(
-                    dbCursor.mogrify(
-                        "(%s,%s,%s,%s)",
-                        entry).decode("utf-8") for entry in entryArray)
                 query: str = f"INSERT INTO {tableName} VALUES {value}"
                 dbCursor.execute(query)
         except psycopg.errors.Error:
             dbConnection.close()
+
+
+async def asyncInsertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) -> None:
+    truncateTable(tableName)
+
+    with psycopg2.connect(**psycopg2Config) as tempConnection:
+        with tempConnection.cursor() as tempCursor:
+            value: str = ','.join(
+                tempCursor.mogrify(
+                    "(%s,%s,%s,%s)",
+                    entry).decode("utf-8") for entry in entryArray)
+
+    async with await psycopg.connect(**connectionConfig) as dbConnection:
+        try:
+            async with dbConnection.cursor() as dbCursor:
+                query: str = f"INSERT INTO {tableName} VALUES {value}"
+                await dbCursor.execute(query)
+        except psycopg.errors.Error:
+            await dbConnection.close()
 
 
 def fetch(queryName: str, *args: object) -> object | None:
@@ -87,10 +109,10 @@ async def asyncFetchAll(queryName: str,
                     dbResponse) == 1 else dbResponse
 
         except psycopg.errors.Error:
-            dbConnection.close()
+            await dbConnection.close()
         except Exception as asyncError:
             _ = asyncError
-            dbConnection.close()
+            await dbConnection.close()
 
 
 def dropTable(tableName: str) -> None:

@@ -14,8 +14,8 @@ enableDB: bool = True
 enableMemcache: bool = True  # always False on non-macOS
 
 # Quart env config setting
-quartHost: str | None = os.getenv("QUART_HOST") if os.getenv("QUART_HOST") else None
-quartPort: str | None = os.getenv("QUART_PORT") if os.getenv("QUART_PORT") else None
+quartHost: str | None = os.getenv("QUART_HOST") if os.getenv("QUART_HOST") else "127.0.0.1"
+quartPort: str | None = os.getenv("QUART_PORT") if os.getenv("QUART_PORT") else 5001
 quartEnv: str | None = os.getenv("QUART_ENV") if os.getenv("QUART_ENV") else "development"
 quartDebug: bool = True if quartEnv == "development" else False
 
