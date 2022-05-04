@@ -1,5 +1,6 @@
 aiohttp==3.8.1
 asyncio==3.4.3
+black==22.3.0
 DateTime==4.4
 Faker==13.4.0
 quart==0.17.0
