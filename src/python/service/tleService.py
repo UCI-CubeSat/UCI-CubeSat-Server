@@ -17,9 +17,9 @@ from src.python.service import satnogsService
 
 def getTwoLineElement() -> dict[str, dict[str, str | datetime]]:
     tleList: list[dict[str, str]] = satnogsService.tleFilter(
-        satnogsService.sortMostRecent(
-            satnogsService.getSatellite()))
-    keys: list[str] = [twoLineElement['tle0'] for twoLineElement in tleList]
+        satnogsService.sortMostRecent(satnogsService.getSatellite())
+    )
+    keys: list[str] = [twoLineElement["tle0"] for twoLineElement in tleList]
     return dict(zip(keys, tleList))
 
 
@@ -29,15 +29,14 @@ def isRecent(timestamp: datetime) -> bool:
 
     if not isinstance(timestamp, datetime):
         lastTimestamp: datetime = datetime.strptime(
-            timestamp.decode("utf-8"), '%Y-%m-%d %H:%M:%S.%f')
+            timestamp.decode("utf-8"), "%Y-%m-%d %H:%M:%S.%f"
+        )
     else:
         lastTimestamp: datetime = timestamp
     currentTimestamp: datetime = datetime.now()
-    return (
-                   currentTimestamp -
-                   lastTimestamp).days == 0 and (
-                   currentTimestamp -
-                   lastTimestamp).seconds < 86400
+    return (currentTimestamp - lastTimestamp).days == 0 and (
+        currentTimestamp - lastTimestamp
+    ).seconds < 86400
 
 
 def clearMemcache() -> None:
@@ -48,19 +47,27 @@ def writeMemcache(data: dict) -> None:
     if not appConfig.enableMemcache:
         return
 
-    memcached.set("two_line_element",
-                  {key: dict(tle0=key,
-                             tle1=data[key]['tle1'],
-                             tle2=data[key]['tle2'],
-                             updated=datetime.now()) for key in data.keys()})
+    memcached.set(
+        "two_line_element",
+        {
+            key: dict(
+                tle0=key,
+                tle1=data[key]["tle1"],
+                tle2=data[key]["tle2"],
+                updated=datetime.now(),
+            )
+            for key in data.keys()
+        },
+    )
 
 
 async def readMemcache() -> dict[str, dict[str, str | datetime]]:
     if not appConfig.enableMemcache:
         return None
 
-    twoLineElement: dict[str, dict[str, str | datetime]] | dict[None, None] = memcached.get("two_line_element",
-                                                                                            default=dict())
+    twoLineElement: dict[str, dict[str, str | datetime]] | dict[
+        None, None
+    ] = memcached.get("two_line_element", default=dict())
 
     if twoLineElement:
         key: str = next(iter(twoLineElement.keys()))
@@ -85,11 +92,9 @@ async def writeDatabase(data) -> None:
     #                   for key in data.keys() if not "\'" in key])
 
     data: list[tuple[str, str, str, datetime]] = [
-        (
-            key,
-            data[key]['tle1'],
-            data[key]['tle2'],
-            datetime.now()) for key in data.keys()]
+        (key, data[key]["tle1"], data[key]["tle2"], datetime.now())
+        for key in data.keys()
+    ]
     await dbUtils.asyncInsertAll("two_line_element", data)
 
 
@@ -98,19 +103,26 @@ async def readDatabase() -> dict[str, dict[str, str | datetime]]:
         return await writeTwoLineElement()
 
     timestamp: datetime | None
-    timestamp, = dbUtils.fetch("getTimestamp")
+    (timestamp,) = dbUtils.fetch("getTimestamp")
 
     if not timestamp:
         return await writeTwoLineElement()
 
     if not isRecent(timestamp):
-        logging.warning("WARNING: twoLineElement in heroku postgre database is outdated")
+        logging.warning(
+            "WARNING: twoLineElement in heroku postgre database is outdated"
+        )
         return await writeTwoLineElement()
 
-    dbData: None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]] \
-        = await dbUtils.asyncFetchAll("getTwoLineElementAll", dict=True)
-    data: dict[str, dict[str, str | datetime]] = dict(zip([twoLineElement['tle0'] for twoLineElement in dbData],
-                                                          [dict(kv) for kv in dbData]))
+    dbData: None | tuple[str, str, str, datetime] | list[
+        tuple[str, str, str, datetime]
+    ] = await dbUtils.asyncFetchAll("getTwoLineElementAll", dict=True)
+    data: dict[str, dict[str, str | datetime]] = dict(
+        zip(
+            [twoLineElement["tle0"] for twoLineElement in dbData],
+            [dict(kv) for kv in dbData],
+        )
+    )
 
     if data:
         writeMemcache(data)
@@ -149,6 +161,7 @@ async def refreshTwoLineElement() -> dict[str, dict[str, str | datetime]]:
 
 
 if __name__ == "__main__":
+
     async def runDatabaseFetch() -> None:
         print(await dbUtils.asyncFetchAll("getTwoLineElementAll", dict=True))
 

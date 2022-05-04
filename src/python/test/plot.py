@@ -29,68 +29,50 @@ def getAllSat():
     response = tleService.readTwoLineElement()
     for k in response.keys():
         satellites.append(
-            skyfieldService.getPath(
-                response[k],
-                "latLng",
-                DURATION,
-                RESOLUTION))
+            skyfieldService.getPath(response[k], "latLng", DURATION, RESOLUTION)
+        )
     return satellites
 
 
 def plotPath() -> FuncAnimation:
     data = getAllSat()
     fig, ax = pyplot.subplots(figsize=(15, 7.5))
-    img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format='jpg')
+    img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format="jpg")
 
     def setup():
         ax.set_xlim([-180, 180])
         ax.set_ylim([-90, 90])
-        ax.imshow(img, origin='upper', extent=[-180, 180, -90, 90], alpha=0.75)
-        ax.annotate(
-            f'. {"Irvine, CA"}',
-            (-117.841132,
-             33.643831),
-            color='black')
-        ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
-        ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
-        ax.set(xlabel='longitude', ylabel='latitude', title='NAME')
+        ax.imshow(img, origin="upper", extent=[-180, 180, -90, 90], alpha=0.75)
+        ax.annotate(f'. {"Irvine, CA"}', (-117.841132, 33.643831), color="black")
+        ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color="black")
+        ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color="black")
+        ax.set(xlabel="longitude", ylabel="latitude", title="NAME")
 
     def init():
         setup()
-        ax.set(
-            xlabel='longitude',
-            ylabel='latitude',
-            title=data[0]["identifier"])
+        ax.set(xlabel="longitude", ylabel="latitude", title=data[0]["identifier"])
         lng = data[0]["lngArray"]
         lat = data[0]["latArray"]
-        currPath = ax.plot(
-            lng,
-            lat,
-            'black',
-            label='ground track',
-            linewidth=2)
-        ax.legend(loc='lower right')
-        return currPath,
+        currPath = ax.plot(lng, lat, "black", label="ground track", linewidth=2)
+        ax.legend(loc="lower right")
+        return (currPath,)
 
     def update(frame):
         ax.cla()
         # gc.collect()
         setup()
-        ax.set(xlabel='longitude', ylabel='latitude',
-               title=data[frame + 1]["identifier"])
+        ax.set(
+            xlabel="longitude", ylabel="latitude", title=data[frame + 1]["identifier"]
+        )
         lng = data[frame + 1]["lngArray"]
         lat = data[frame + 1]["latArray"]
-        currPath = ax.plot(
-            lng,
-            lat,
-            'black',
-            label='ground track',
-            linewidth=2)
-        ax.legend(loc='lower right')
-        return currPath,
+        currPath = ax.plot(lng, lat, "black", label="ground track", linewidth=2)
+        ax.legend(loc="lower right")
+        return (currPath,)
 
-    return animation.FuncAnimation(fig, update, frames=len(data) - 1,
-                                   init_func=init, interval=1000)
+    return animation.FuncAnimation(
+        fig, update, frames=len(data) - 1, init_func=init, interval=1000
+    )
 
 
 def plotRealTime():
@@ -99,23 +81,22 @@ def plotRealTime():
     # plot movement of first satellite
     fig = pyplot.figure()
     ax = fig.add_subplot()
-    img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format='jpg')
+    img = pyplot.imread(urllib.request.urlopen(IMAGE_URL), format="jpg")
 
     x = satelliteToPlot["lngArray"]
     y = satelliteToPlot["latArray"]
 
     # create the first plot
-    point, = ax.plot([x[0]], [y[0]], 'ro')
+    (point,) = ax.plot([x[0]], [y[0]], "ro")
     ax.legend()
     ax.set_xlim([-180, 180])
     ax.set_ylim([-90, 90])
-    ax.imshow(img, origin='upper', extent=[-180, 180, -90, 90], alpha=0.75)
-    ax.annotate(f'. {"Irvine, CA"}', (-117.841132, 33.643831), color='black')
+    ax.imshow(img, origin="upper", extent=[-180, 180, -90, 90], alpha=0.75)
+    ax.annotate(f'. {"Irvine, CA"}', (-117.841132, 33.643831), color="black")
     # ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
-    ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color='black')
-    ax.annotate(f'. {"Sydney, AUS"}', (151.2093, -33.8688), color='black')
-    ax.set(xlabel='longitude', ylabel='latitude',
-           title=satelliteToPlot["identifier"])
+    ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color="black")
+    ax.annotate(f'. {"Sydney, AUS"}', (151.2093, -33.8688), color="black")
+    ax.set(xlabel="longitude", ylabel="latitude", title=satelliteToPlot["identifier"])
 
     # move the point position at every frame
     def update_point(n, x, y, point):

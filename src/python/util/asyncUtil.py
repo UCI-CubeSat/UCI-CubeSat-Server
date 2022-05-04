@@ -11,9 +11,5 @@ async def asyncRequest(session: aiohttp.ClientSession, url: str) -> Any:
 
 
 async def asyncRequestAll(session: aiohttp.ClientSession, urls: [str]) -> tuple[Any]:
-    asyncTask = [
-        asyncio.ensure_future(
-            asyncRequest(
-                session,
-                url)) for url in urls]
+    asyncTask = [asyncio.ensure_future(asyncRequest(session, url)) for url in urls]
     return await asyncio.gather(*asyncTask)
