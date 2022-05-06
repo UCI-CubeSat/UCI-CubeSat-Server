@@ -70,12 +70,12 @@ Double check `Python3` and `Pip3` are installed
     
     Create a new file under the UCI-CubeSat-Server root folder, named `.env`
 
-    Ask in the discord channel for a copy of the `.env` file.
+    Ask in the #gs-server-secret discord channel for a copy of the `.env` file.
 
 
-6. Run Flask: `flask run`
+6. Run Quart: `quart run`
 
-    Reopen your IDE and retry if `flask run` does not work initially
+    Reopen your IDE and retry if `quart run` does not work initially
 
 ## Connecting to SQL Database
 
@@ -121,7 +121,7 @@ Double check `Python3` and `Pip3` are installed
 
    create [venv environment](https://github.com/UCI-CubeSat/UCI-CubeSat-Server#setting-up-the-pythonflask-backend-server-locally)
 
-   `flask run`
+   `quart run`
 2. cd to UCI-CubeSat-Dashboard:
 
    `npm start`
@@ -139,7 +139,7 @@ For Python Flask server, Heroku require you to have:
 
 `app.py` at project's root directory
 
-`web: gunicorn app:app` inside `Procfile` at project's root directory
+`web: hypercorn app:app` inside `Procfile` at project's root directory
 
 `pip` `requirements.txt` at project's root directory
 
