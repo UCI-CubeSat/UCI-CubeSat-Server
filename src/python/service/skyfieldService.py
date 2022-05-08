@@ -15,22 +15,26 @@ from skyfield.timelib import Time, Timescale
 
 
 def getPath(
-        data: dict[str, dict[str, str | datetime.datetime]],
-        mode: str = "latLng",
-        duration: float = 10 * 3600,
-        resolution: float = 4.0) -> dict:
-    return getSphericalPath(data, duration, resolution) if mode == "latLng" \
+    data: dict[str, dict[str, str | datetime.datetime]],
+    mode: str = "latLng",
+    duration: float = 10 * 3600,
+    resolution: float = 4.0,
+) -> dict:
+    return (
+        getSphericalPath(data, duration, resolution)
+        if mode == "latLng"
         else getCartesianPath(data, duration, resolution)
+    )
 
 
-def getSphericalPath(data: dict[str, dict[str, str | datetime.datetime]],
-                     duration: float,
-                     resolution: float) -> dict[str, object]:
+def getSphericalPath(
+    data: dict[str, dict[str, str | datetime.datetime]],
+    duration: float,
+    resolution: float,
+) -> dict[str, object]:
     satellite: EarthSatellite = EarthSatellite(
-        data["tle1"],
-        data["tle2"],
-        data["tle0"],
-        load.timescale())
+        data["tle1"], data["tle2"], data["tle0"], load.timescale()
+    )
     ts: Timescale = load.timescale()
     t: Time = ts.now()
     start = t.utc.second
@@ -41,12 +45,8 @@ def getSphericalPath(data: dict[str, dict[str, str | datetime.datetime]],
         t.utc.day,
         t.utc.hour,
         t.utc.minute,
-        numpy.arange(
-            start,
-            start +
-            duration,
-            resolution *
-            60))
+        numpy.arange(start, start + duration, resolution * 60),
+    )
     location: Geometric | Geocentric | Barycentric | ICRF = satellite.at(interval)
     path: GeographicPosition = wgs84.subpoint(location)
 
@@ -54,27 +54,29 @@ def getSphericalPath(data: dict[str, dict[str, str | datetime.datetime]],
     response["timestamp"]: datetime.time = t.utc
     response["identifier"]: str = data["tle0"]
     response["origin"]: tuple = (
-        wgs84.subpoint(
-            satellite.at(t)).latitude.degrees, wgs84.subpoint(
-            satellite.at(t)).longitude.degrees)
+        wgs84.subpoint(satellite.at(t)).latitude.degrees,
+        wgs84.subpoint(satellite.at(t)).longitude.degrees,
+    )
     response["latArray"]: numpy.array = path.latitude.degrees
     response["lngArray"]: numpy.array = path.longitude.degrees
-    response["latLngArray"]: list = [[response["latArray"][index], response["lngArray"][index]]
-                                     for index in range(len(response["latArray"]))]
+    response["latLngArray"]: list = [
+        [response["latArray"][index], response["lngArray"][index]]
+        for index in range(len(response["latArray"]))
+    ]
     response["elevationArray"]: numpy.array = path.elevation.au
     response["interval"]: datetime.time = interval
 
     return response
 
 
-def getCartesianPath(data: dict[str, dict[str, str | datetime.datetime]],
-                     duration: float,
-                     resolution: float) -> dict[str, object]:
+def getCartesianPath(
+    data: dict[str, dict[str, str | datetime.datetime]],
+    duration: float,
+    resolution: float,
+) -> dict[str, object]:
     satellite: EarthSatellite = EarthSatellite(
-        data["tle1"],
-        data["tle2"],
-        data["tle0"],
-        load.timescale())
+        data["tle1"], data["tle2"], data["tle0"], load.timescale()
+    )
     ts: Timescale = load.timescale()
     t: Time = ts.now()
     start = t.utc.second
@@ -85,22 +87,27 @@ def getCartesianPath(data: dict[str, dict[str, str | datetime.datetime]],
         t.utc.day,
         t.utc.hour,
         t.utc.minute,
-        numpy.arange(
-            start,
-            start +
-            duration,
-            resolution *
-            60))
+        numpy.arange(start, start + duration, resolution * 60),
+    )
     location: Geometric | Geocentric | Barycentric | ICRF = satellite.at(interval)
     d: ndarray = numpy.array([])
 
     for i in range(len(location.position.km[0])):
-        numpy.append(d,
-                     (numpy.linalg.norm(numpy.array([location.position.km[0][i],
-                                                     location.position.km[1][i],
-                                                     location.position.km[2][i]]) - numpy.array([0,
-                                                                                                 0,
-                                                                                                 0]))))
+        numpy.append(
+            d,
+            (
+                numpy.linalg.norm(
+                    numpy.array(
+                        [
+                            location.position.km[0][i],
+                            location.position.km[1][i],
+                            location.position.km[2][i],
+                        ]
+                    )
+                    - numpy.array([0, 0, 0])
+                )
+            ),
+        )
 
     response: dict[str, object] = dict()
     response["identifier"]: str = data["tle0"]
@@ -124,14 +131,13 @@ def getSerializedPath(data: dict[str, object]) -> dict[str, object]:
 
 
 def findHorizonTime(
-        data: dict[str, dict[str, str | datetime.datetime]],
-        duration: float,
-        receiverLocation: wgs84.latlon) -> json:
+    data: dict[str, dict[str, str | datetime.datetime]],
+    duration: float,
+    receiverLocation: wgs84.latlon,
+) -> json:
     satellite: EarthSatellite = EarthSatellite(
-        data["tle1"],
-        data["tle2"],
-        data["tle0"],
-        load.timescale())
+        data["tle1"], data["tle2"], data["tle0"], load.timescale()
+    )
     timestamp: Timescale = load.timescale()
     start: Time = load.timescale().now()
 
@@ -141,16 +147,18 @@ def findHorizonTime(
         start.utc.day,
         start.utc.hour,
         start.utc.minute,
-        start.utc.second +
-        duration)
+        start.utc.second + duration,
+    )
     condition: dict[str, float] = {
         "bare": 1.0,
         "marginal": 30.0,
         "good": 45.0,
-        "excellent": 60.0}
+        "excellent": 60.0,
+    }
     degree: float = condition["bare"]  # peak is at 90
     timestampUtc, events = satellite.find_events(
-        receiverLocation, start, end, altitude_degrees=degree)
+        receiverLocation, start, end, altitude_degrees=degree
+    )
 
     if not numpy.array_equal(events[:1], [0]):
         start = timestamp.utc(
@@ -159,9 +167,11 @@ def findHorizonTime(
             start.utc.day,
             start.utc.hour,
             start.utc.minute,
-            start.utc.second - 15 * 60)
+            start.utc.second - 15 * 60,
+        )
         timestampUtc, events = satellite.find_events(
-            receiverLocation, start, end, altitude_degrees=degree)
+            receiverLocation, start, end, altitude_degrees=degree
+        )
 
     if not numpy.array_equal(events[-1:], [2]):
         end = timestamp.utc(
@@ -170,12 +180,11 @@ def findHorizonTime(
             start.utc.day,
             start.utc.hour,
             start.utc.minute,
-            start.utc.second +
-            duration +
-            15 *
-            60)
+            start.utc.second + duration + 15 * 60,
+        )
         timestampUtc, events = satellite.find_events(
-            receiverLocation, start, end, altitude_degrees=degree)
+            receiverLocation, start, end, altitude_degrees=degree
+        )
     timestampUtc = list(timestampUtc)
 
     if events.size == 0:
@@ -254,10 +263,10 @@ def findHorizonTime(
                 datetime_rise.day,
                 datetime_rise.hour,
                 datetime_rise.minute,
-                datetime_rise.second)
+                datetime_rise.second,
+            )
 
-            diff = numpy.float64(
-                (datetime_set - datetime_rise).total_seconds())
+            diff = numpy.float64((datetime_set - datetime_rise).total_seconds())
             t0Sec = t0.utc.second
             t1Sec = t0Sec + diff
             eventDuration = timestamp.utc(
@@ -266,31 +275,35 @@ def findHorizonTime(
                 t0.utc.day,
                 t0.utc.hour,
                 t0.utc.minute,
-                numpy.arange(
-                    t0Sec,
-                    t1Sec,
-                    60))
+                numpy.arange(t0Sec, t1Sec, 60),
+            )
             skyfieldTimeFormat = "%Y %b %d %H:%M:%S"
             eventTimeArray = eventDuration.utc_strftime(skyfieldTimeFormat)
 
             riseUtc = datetime.datetime.strptime(
-                eventTimeArray[0], skyfieldTimeFormat).replace(
-                tzinfo=datetime.timezone.utc)
+                eventTimeArray[0], skyfieldTimeFormat
+            ).replace(tzinfo=datetime.timezone.utc)
             setUtc = datetime.datetime.strptime(
-                eventTimeArray[-1], skyfieldTimeFormat).replace(tzinfo=datetime.timezone.utc)
+                eventTimeArray[-1], skyfieldTimeFormat
+            ).replace(tzinfo=datetime.timezone.utc)
             peakUtc = datetime_peak
-            riseIso = riseUtc.isoformat(sep='T', timespec='auto')
-            setIso = setUtc.isoformat(sep='T', timespec='auto')
-            peakIso = peakUtc.isoformat(sep='T', timespec='auto')
-            eventInterval = [(datetime.datetime.strptime(e, skyfieldTimeFormat)
-                              .replace(tzinfo=datetime.timezone.utc))
-                             .isoformat(sep='T', timespec='auto')
-                             for e in eventTimeArray]
+            riseIso = riseUtc.isoformat(sep="T", timespec="auto")
+            setIso = setUtc.isoformat(sep="T", timespec="auto")
+            peakIso = peakUtc.isoformat(sep="T", timespec="auto")
+            eventInterval = [
+                (
+                    datetime.datetime.strptime(e, skyfieldTimeFormat).replace(
+                        tzinfo=datetime.timezone.utc
+                    )
+                ).isoformat(sep="T", timespec="auto")
+                for e in eventTimeArray
+            ]
 
             response[peakIso] = dict(
                 rise=riseIso,
                 set=setIso,
                 duration=len(eventTimeArray),
-                interval=eventInterval)
+                interval=eventInterval,
+            )
 
     return response

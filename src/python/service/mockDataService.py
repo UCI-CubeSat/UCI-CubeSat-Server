@@ -30,8 +30,7 @@ def generateLngLat() -> dict[str, fake.pydecimal]:
     Returns: any valid {lng: Decimal('13.4134995'),
                 lat: Decimal('13.4134995')}
     """
-    return dict(lng=fake.longitude(),
-                lat=fake.latitude())
+    return dict(lng=fake.longitude(), lat=fake.latitude())
 
 
 def generateLocation() -> dict[str, float | str]:
@@ -44,11 +43,13 @@ def generateLocation() -> dict[str, float | str]:
                 timezone: "America/Los_Angeles"}
     """
     location: (str, str, str, str, str) = fake.local_latlng()
-    return dict(lng=location[1],
-                lat=location[0],
-                city=location[2],
-                country=location[3],
-                timezone=location[4])
+    return dict(
+        lng=location[1],
+        lat=location[0],
+        city=location[2],
+        country=location[3],
+        timezone=location[4],
+    )
 
 
 def generateAltitude():
@@ -93,7 +94,7 @@ def generateAntennaStatus():
 
 if __name__ == "__main__":
     for funcName in dir():
-        if funcName[:len("generate")] != "generate":
+        if funcName[: len("generate")] != "generate":
             continue
 
         try:
@@ -105,5 +106,3 @@ if __name__ == "__main__":
             continue
 
         print(f"{funcName} {fakeData}")
-
-

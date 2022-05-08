@@ -8,12 +8,12 @@ from src.python.config.appConfig import quartEnv, webSocketUrl, apiBaseUrl
 
 
 socketIO = socketio.Client()
-webSocketRoute: Blueprint = Blueprint('webSocket', __name__)
+webSocketRoute: Blueprint = Blueprint("webSocket", __name__)
 # TODO replace with Kafka
 responseQueue: list[Any] = []
 
 
-@webSocketRoute.route(f'{apiBaseUrl}/ws_connect', methods=['GET'])
+@webSocketRoute.route(f"{apiBaseUrl}/ws_connect", methods=["GET"])
 @socketIO.event
 def wsConnect():
     try:
@@ -27,7 +27,7 @@ def wsConnect():
     return quart.jsonify(dict(websocketConnection=appConfig.webSocketConnected))
 
 
-@webSocketRoute.route(f'{apiBaseUrl}/ws_message', methods=['GET'])
+@webSocketRoute.route(f"{apiBaseUrl}/ws_message", methods=["GET"])
 @socketIO.event
 def wsMessage():
     if quartEnv != "development":
@@ -50,7 +50,7 @@ def wsMessage():
 
 
 # TODO replace with Kafka
-@webSocketRoute.route(f'{apiBaseUrl}/ws_queue', methods=['GET'])
+@webSocketRoute.route(f"{apiBaseUrl}/ws_queue", methods=["GET"])
 def wsQueue():
     return quart.jsonify(responseQueue)
 
@@ -63,9 +63,11 @@ def connect():
 
 @socketIO.event
 def message(data: str, callback=None):
-    return socketIO.emit('message', f"{data}", callback=callback) \
-        if callable(callback) \
-        else socketIO.emit('message', f"{data}")
+    return (
+        socketIO.emit("message", f"{data}", callback=callback)
+        if callable(callback)
+        else socketIO.emit("message", f"{data}")
+    )
 
 
 @socketIO.on("response")

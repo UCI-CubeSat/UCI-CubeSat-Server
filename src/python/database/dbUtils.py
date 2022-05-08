@@ -9,9 +9,8 @@ from src.python.config.appConfig import dbCredential, psycopg2Config
 
 connectionConfig = dict(conninfo=dbCredential, autocommit=True)
 connectionConfigRowFactory = dict(
-    conninfo=dbCredential,
-    autocommit=True,
-    row_factory=dict_row)
+    conninfo=dbCredential, autocommit=True, row_factory=dict_row
+)
 
 
 def insertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) -> None:
@@ -19,10 +18,10 @@ def insertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) 
 
     with psycopg2.connect(**psycopg2Config) as tempConnection:
         with tempConnection.cursor() as tempCursor:
-            value: str = ','.join(
-                tempCursor.mogrify(
-                    "(%s,%s,%s,%s)",
-                    entry).decode("utf-8") for entry in entryArray)
+            value: str = ",".join(
+                tempCursor.mogrify("(%s,%s,%s,%s)", entry).decode("utf-8")
+                for entry in entryArray
+            )
 
     with psycopg.connect(**connectionConfig) as dbConnection:
         try:
@@ -33,17 +32,21 @@ def insertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) 
             dbConnection.close()
 
 
-async def asyncInsertAll(tableName: str, entryArray: list[tuple[str, str, str, datetime]]) -> None:
+async def asyncInsertAll(
+    tableName: str, entryArray: list[tuple[str, str, str, datetime]]
+) -> None:
     truncateTable(tableName)
 
     with psycopg2.connect(**psycopg2Config) as tempConnection:
         with tempConnection.cursor() as tempCursor:
-            value: str = ','.join(
-                tempCursor.mogrify(
-                    "(%s,%s,%s,%s)",
-                    entry).decode("utf-8") for entry in entryArray)
+            value: str = ",".join(
+                tempCursor.mogrify("(%s,%s,%s,%s)", entry).decode("utf-8")
+                for entry in entryArray
+            )
 
-    async with await psycopg.connect(**connectionConfig) as dbConnection:
+    async with await psycopg.AsyncConnection.connect(
+        conninfo=dbCredential
+    ) as dbConnection:
         try:
             async with dbConnection.cursor() as dbCursor:
                 query: str = f"INSERT INTO {tableName} VALUES {value}"
@@ -65,10 +68,10 @@ def fetch(queryName: str, *args: object) -> object | None:
             dbConnection.close()
 
 
-def fetchAll(queryName: str,
-             *args: object,
-             **kwargs: object) -> None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]]:
-    if 'dict' in kwargs.keys() and kwargs['dict']:
+def fetchAll(
+    queryName: str, *args: object, **kwargs: object
+) -> None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]]:
+    if "dict" in kwargs.keys() and kwargs["dict"]:
         config: dict[str, object] = connectionConfigRowFactory
     else:
         config: dict[str, object] = connectionConfig
@@ -81,18 +84,22 @@ def fetchAll(queryName: str,
                     dbCursor.execute(dbQueries.queries[queryName]())
 
                 dbResponse: list[tuple[str, str, str, datetime]] = dbCursor.fetchall()
-                return None if len(dbResponse) == 0 else dbResponse[0] if len(
-                    dbResponse) == 1 else dbResponse
+                return (
+                    None
+                    if len(dbResponse) == 0
+                    else dbResponse[0]
+                    if len(dbResponse) == 1
+                    else dbResponse
+                )
 
         except psycopg.errors.Error:
             dbConnection.close()
 
 
-async def asyncFetchAll(queryName: str,
-                        *args: object,
-                        **kwargs: object) -> None | tuple[str, str, str, datetime] | list[tuple[str,
-                                                                                                str, str, datetime]]:
-    if 'dict' in kwargs.keys() and kwargs['dict']:
+async def asyncFetchAll(
+    queryName: str, *args: object, **kwargs: object
+) -> None | tuple[str, str, str, datetime] | list[tuple[str, str, str, datetime]]:
+    if "dict" in kwargs.keys() and kwargs["dict"]:
         config: dict[str, object] = connectionConfigRowFactory
     else:
         config: dict[str, object] = connectionConfig
@@ -104,9 +111,16 @@ async def asyncFetchAll(queryName: str,
                 else:
                     await dbCursor.execute(dbQueries.queries[queryName]())
 
-                dbResponse: list[tuple[str, str, str, datetime]] = await dbCursor.fetchall()
-                return None if len(dbResponse) == 0 else dbResponse[0] if len(
-                    dbResponse) == 1 else dbResponse
+                dbResponse: list[
+                    tuple[str, str, str, datetime]
+                ] = await dbCursor.fetchall()
+                return (
+                    None
+                    if len(dbResponse) == 0
+                    else dbResponse[0]
+                    if len(dbResponse) == 1
+                    else dbResponse
+                )
 
         except psycopg.errors.Error:
             await dbConnection.close()
