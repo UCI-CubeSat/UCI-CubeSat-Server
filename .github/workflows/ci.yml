@@ -1,4 +1,4 @@
-name: Endpoints status check
+name: Endpoints Status Check w/ Deploy
 on:
   push:
     branches: [main]
@@ -10,24 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # deploy to a heroku app specifically created for testing only
-      - uses: akhileshns/heroku-deploy@v3.12.12
+      - name: Deploy to Heroku Development Server Environment
+        uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "uci-cubesat-server-dev"
           heroku_email: "chillinthestar@outlook.com"
-      - name: Install Python 3
+      - name: Install Python3.10
         uses: actions/setup-python@v1
         with:
           python-version: 3.10.4
-      # run tests from ./src/python/test/test_endpoint.py
-      - name: Run test with pytest
+      - name: Install PyTest requirements and run PyTest
         run: |
           cd src/python/test
           pip install -r "requirements.txt"
           pytest test_endpoint.py
-      # When tests pass, deploy this commit to production
-      - uses: akhileshns/heroku-deploy@v3.12.12
+      - name: Deploy to Heroku Production Server Environment
+        uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "uci-cubesat-server"
