@@ -18,7 +18,9 @@ async def profileReadTwoLineElement() -> None:
 
 
 async def profileGetHorizon() -> None:
-    twoLineElement: dict[str, dict[str, str | datetime]] = await tleService.readTwoLineElement()
+    twoLineElement: dict[
+        str, dict[str, str | datetime]
+    ] = await tleService.readTwoLineElement()
     with cProfile.Profile() as profiler:
         skyfieldService.findHorizonTime(
             twoLineElement[next(iter(twoLineElement.keys()))],
