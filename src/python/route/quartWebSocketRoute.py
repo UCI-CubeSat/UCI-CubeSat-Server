@@ -41,7 +41,10 @@ def wsMessage():
         return quart.jsonify(dict(status="fail"))
 
     try:
-        message(webSocketMessage, callback=lambda *args: responseQueue.append(*args))
+        message(
+            webSocketMessage,
+            callback=lambda *args: responseQueue.append(*args),
+        )
     except Exception as webSocketError:
         _ = webSocketError
         return quart.jsonify(dict(status="fail"))
