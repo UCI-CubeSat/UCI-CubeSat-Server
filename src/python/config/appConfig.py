@@ -3,7 +3,6 @@ import os
 from bmemcached import ReplicatingClient
 from dotenv import load_dotenv
 from quart import Quart
-from quart_cors import cors
 import psycopg
 import bmemcached
 
@@ -24,7 +23,6 @@ quartEnv: str | None = (
 quartDebug: bool = True if quartEnv == "development" else False
 
 app: Quart = Quart(__name__)
-cors(app)
 
 # WebSocket config
 webSocketUrl: str = (

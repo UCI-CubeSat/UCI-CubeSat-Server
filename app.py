@@ -1,3 +1,6 @@
+from quart_cors import cors
+
+from src.python.route.quartDashboardRoute import dashboardRoute
 from src.python.route.quartMainRoute import mainRoute
 from src.python.route.quartTrackerRoute import trackerRoute
 from src.python.route.quartEmailRoute import emailRoute
@@ -15,6 +18,7 @@ _ = [
     app.register_blueprint(route)
     for route in [mainRoute, trackerRoute, emailRoute, webSocketRoute]
 ]
+cors(app)
 
 
 if __name__ == "__main__":
