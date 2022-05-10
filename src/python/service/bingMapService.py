@@ -32,4 +32,7 @@ def getLatLong(
     )
     response = requests.get(url).json()
 
-    return response["resourceSets"][0]["resources"][0]["point"]["coordinates"], response
+    return (
+        response["resourceSets"][0]["resources"][0]["point"]["coordinates"],
+        response,
+    )

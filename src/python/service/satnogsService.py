@@ -50,7 +50,9 @@ def getTwoLineElement() -> dict[str, dict[str, str]]:
 
 
 def satelliteFilter(
-    satelliteList: list[dict[str, str]], mode: str = "AFSK", baud: int = 1200
+    satelliteList: list[dict[str, str]],
+    mode: str = "AFSK",
+    baud: int = 1200,
 ) -> list[dict[str, str]]:
     """
     filter the list of satellite by modulation mode and baud rate

@@ -1,7 +1,16 @@
 import requests
 import time
-from ..util.asyncUtil import asyncRequest, asyncRequestAll, asyncio, aiohttp
-from ..service.satnogsService import TRANSMITTER_URL, TLE_URL, SATELLITE_URL
+from ..util.asyncUtil import (
+    asyncRequest,
+    asyncRequestAll,
+    asyncio,
+    aiohttp,
+)
+from ..service.satnogsService import (
+    TRANSMITTER_URL,
+    TLE_URL,
+    SATELLITE_URL,
+)
 
 
 def testSyncRequest():

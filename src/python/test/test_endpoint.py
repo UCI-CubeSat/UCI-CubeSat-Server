@@ -2,7 +2,12 @@ import requests
 from datetime import datetime
 from urllib.parse import quote
 
-from ..util.asyncUtil import asyncRequest, asyncRequestAll, aiohttp, asyncio
+from ..util.asyncUtil import (
+    asyncRequest,
+    asyncRequestAll,
+    aiohttp,
+    asyncio,
+)
 from ..service.mockDataService import generateLngLat
 
 # baseUrl for production

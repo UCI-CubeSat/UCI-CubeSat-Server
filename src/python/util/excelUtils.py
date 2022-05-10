@@ -5,7 +5,12 @@ import openpyxl
 from src.python.util import filepathUtils
 from src.python.service import satnogsService
 
-TABS = {0: "allSatellite", 1: "filteredSatellite", 2: "sortedSatellite", 3: "TLE"}
+TABS = {
+    0: "allSatellite",
+    1: "filteredSatellite",
+    2: "sortedSatellite",
+    3: "TLE",
+}
 FILE_DIR = (
     filepathUtils.getRoot() + "/CubeSAT/satnogs" + str(datetime.now().date()) + ".xlsx"
 )
