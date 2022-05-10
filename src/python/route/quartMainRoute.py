@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 import quart
 from quart import request, Response, Blueprint
+from quart_cors import cors
 from requests import Response
 from skyfield.toposlib import wgs84
 import time
@@ -17,6 +18,7 @@ from src.python.util.asyncUtil import asyncRequest
 
 
 mainRoute: Blueprint = Blueprint("main", __name__)
+cors(mainRoute)
 
 
 @mainRoute.route(f"/", methods=["GET"])

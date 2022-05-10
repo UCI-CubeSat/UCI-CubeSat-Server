@@ -1,6 +1,7 @@
 from datetime import datetime
 import quart
 from quart import request, Blueprint
+from quart_cors import cors
 from skyfield.toposlib import wgs84
 import urllib
 
@@ -12,6 +13,7 @@ from src.python.service import (
 )
 
 trackerRoute: Blueprint = Blueprint("tracker", __name__)
+cors(trackerRoute)
 
 
 @trackerRoute.route(f"{apiBaseUrl}/tle", methods=["GET"])
