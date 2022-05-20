@@ -2,6 +2,7 @@ from typing import Any
 import quart
 from quart import request, Blueprint
 import socketio
+from quart_cors import cors
 
 from src.python.config import appConfig
 from src.python.config.appConfig import quartEnv, webSocketUrl, apiBaseUrl
@@ -9,6 +10,7 @@ from src.python.config.appConfig import quartEnv, webSocketUrl, apiBaseUrl
 
 socketIO = socketio.Client()
 webSocketRoute: Blueprint = Blueprint("webSocket", __name__)
+cors(webSocketRoute)
 # TODO replace with Kafka
 responseQueue: list[Any] = []
 
@@ -41,7 +43,10 @@ def wsMessage():
         return quart.jsonify(dict(status="fail"))
 
     try:
-        message(webSocketMessage, callback=lambda *args: responseQueue.append(*args))
+        message(
+            webSocketMessage,
+            callback=lambda *args: responseQueue.append(*args),
+        )
     except Exception as webSocketError:
         _ = webSocketError
         return quart.jsonify(dict(status="fail"))

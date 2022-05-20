@@ -50,7 +50,11 @@ def plotPath() -> FuncAnimation:
 
     def init():
         setup()
-        ax.set(xlabel="longitude", ylabel="latitude", title=data[0]["identifier"])
+        ax.set(
+            xlabel="longitude",
+            ylabel="latitude",
+            title=data[0]["identifier"],
+        )
         lng = data[0]["lngArray"]
         lat = data[0]["latArray"]
         currPath = ax.plot(lng, lat, "black", label="ground track", linewidth=2)
@@ -62,7 +66,9 @@ def plotPath() -> FuncAnimation:
         # gc.collect()
         setup()
         ax.set(
-            xlabel="longitude", ylabel="latitude", title=data[frame + 1]["identifier"]
+            xlabel="longitude",
+            ylabel="latitude",
+            title=data[frame + 1]["identifier"],
         )
         lng = data[frame + 1]["lngArray"]
         lat = data[frame + 1]["latArray"]
@@ -96,7 +102,11 @@ def plotRealTime():
     # ax.annotate(f'. {"Plano, TX"}', (-96.697442, 32.999553), color='black')
     ax.annotate(f'. {"Dalian, China"}', (121.6147, 38.9140), color="black")
     ax.annotate(f'. {"Sydney, AUS"}', (151.2093, -33.8688), color="black")
-    ax.set(xlabel="longitude", ylabel="latitude", title=satelliteToPlot["identifier"])
+    ax.set(
+        xlabel="longitude",
+        ylabel="latitude",
+        title=satelliteToPlot["identifier"],
+    )
 
     # move the point position at every frame
     def update_point(n, x, y, point):
