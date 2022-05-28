@@ -1,4 +1,4 @@
-# UCI CubeSat Backend Flask Server
+# UCI CubeSat Backend Quart Server
 
 ## Contributor:
 
@@ -40,7 +40,7 @@ Double check `Python3` and `Pip3` are installed
 
     `choco install python --version=3.10.2`
 
-## Setting up the Python/Flask Backend Server locally
+## Setting up the Python/Quart Backend Server locally
 
 1. Setup virtual environment
 
@@ -119,7 +119,7 @@ Double check `Python3` and `Pip3` are installed
 ## Run FullStack Web App
 1. cd to UCI-CubeSat-Server:
 
-   create [venv environment](https://github.com/UCI-CubeSat/UCI-CubeSat-Server#setting-up-the-pythonflask-backend-server-locally)
+   create [venv environment](https://github.com/UCI-CubeSat/UCI-CubeSat-Server#setting-up-the-pythonquart-backend-server-locally)
 
    `quart run`
 2. cd to UCI-CubeSat-Dashboard:
@@ -135,7 +135,7 @@ The client and server must be deploy to different dyno/app
 
 Example: [Front End](https://uci-cubesat-dashboard.herokuapp.com/), [Back End](https://uci-cubesat-server.herokuapp.com/)
 
-For Python Flask server, Heroku require you to have:
+For Python Quart server, Heroku require you to have:
 
 `app.py` at project's root directory
 
