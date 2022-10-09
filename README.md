@@ -1,6 +1,7 @@
 # UCI CubeSat Backend Quart Server
 
 ## Contributor:
+Katherine Hsu: kaishih@uci.edu,
 
 Hailey Lin: weixil4@uci.edu,
 
