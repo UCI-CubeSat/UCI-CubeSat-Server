@@ -39,7 +39,7 @@ Double check `Python3` and `Pip3` are installed
 
     `choco install postgresql`
 
-    `choco install python --version=3.10.2`
+    `choco install python --version=3.10.7`
 
 ## Setting up the Python/Quart Backend Server locally
 
