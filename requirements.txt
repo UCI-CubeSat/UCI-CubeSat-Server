@@ -13,7 +13,8 @@ openpyxl
 Pillow
 pip
 pre-commit==2.19.0
-psycopg==3.0.11
+psycopg==3.0.11; sys_platform != 'darwin'
+psycopg[c]; sys_platform == 'darwin'
 psycopg2==2.9.3
 pytest==7.1.1
 python-binary-memcached==0.31.1
